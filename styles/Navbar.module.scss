@@ -1,0 +1,11 @@
+.navbar {
+  margin-block: 1rem;
+  font-size: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+
+  a:hover {
+    text-decoration: underline;
+  }
+}

@@ -1,0 +1,32 @@
+.field {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 0.5rem;
+  justify-items: center;
+  align-items: center;
+
+  .players,
+  .rows {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    gap: 0.5rem;
+
+    & > * {
+      width: 100%;
+      height: 100%;
+      background-color: red;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+
+  .players {
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .rows {
+    grid-template-rows: repeat(7, 1fr);
+  }
+}
