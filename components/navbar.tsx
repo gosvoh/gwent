@@ -8,9 +8,12 @@ export default function Navbar() {
     <nav className={styles.navbar}>
       <Link href={"/"}>Home</Link>
       {session ? (
-        <Link href={""} onClick={() => signOut()}>
-          Sign out
-        </Link>
+        <>
+          <Link href={"/games"}>Games</Link>
+          <Link href={""} onClick={() => signOut()}>
+            Sign out
+          </Link>
+        </>
       ) : (
         <Link href={""} onClick={() => signIn()}>
           Sign in
