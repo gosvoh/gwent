@@ -5,14 +5,11 @@ import post from "../../../utils/request.manager";
 export default NextAuth({
   providers: [
     CredentialsProvider({
-      id: "credentials",
-      name: "Credentials",
-      type: "credentials",
       credentials: {
         username: { label: "Username", type: "text", placeholder: "jsmith" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         if (!credentials || !credentials.username || !credentials.password)
           // return null;
           throw new Error("Missing credentials");
@@ -21,11 +18,11 @@ export default NextAuth({
           credentials.username,
           credentials.password
         );
-        if (res[0].ERROR) return null;
+        if (res[0].ERROR) throw new Error(res[0].ERROR[0]);
         const user = {
-          id: "asd",
-          name: "J Smith",
-          email: "jsmith@example.com",
+          id: "id",
+          name: credentials.username,
+          email: undefined,
           token: res[0].token[0],
         };
 
@@ -34,7 +31,6 @@ export default NextAuth({
       },
     }),
   ],
-  debug: false,
   secret: "secret",
   callbacks: {
     jwt: ({ token, user }) => {
