@@ -9,7 +9,7 @@ type User = {
 export default function Home() {
   const { data: session } = useSession();
   // @ts-ignore
-  const user: User = { token: session?.user.token || "" };
+  const user: User = { token: session?.user?.name || "" };
 
   return (
     <div className={styles.container}>
@@ -17,7 +17,13 @@ export default function Home() {
         <h1 className={styles.title}>Welcome to Gwent</h1>
 
         <p className={styles.description}>
-          {session ? <>Logged as {user.token}</> : <>Get started</>}
+          {session ? (
+            <>
+              Logged as <span className={styles.login}>{user.token}</span>
+            </>
+          ) : (
+            <>Get started</>
+          )}
         </p>
 
         <div className={styles.buttons}>
