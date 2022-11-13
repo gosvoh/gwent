@@ -1,41 +1,59 @@
 import styles from "../styles/Home.module.scss";
-import { signIn, useSession } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import Link from "next/link";
+import { Session } from "next-auth";
+import { useEffect } from "react";
 
-type User = {
-  token: string;
-};
-
-export default function Home() {
-  const { data: session } = useSession();
-  // @ts-ignore
-  const user: User = { token: session?.user?.name || "" };
+export default function Home({
+  authSession: session,
+}: {
+  authSession: Session;
+}) {
+  useEffect(() => {
+    console.log("session from index", session);
+  }, [session]);
 
   return (
     <div className={styles.container}>
       <main className={styles.main}>
         <h1 className={styles.title}>Welcome to Gwent</h1>
 
-        <p className={styles.description}>
-          {session ? (
-            <>
-              Logged as <span className={styles.login}>{user.token}</span>
-            </>
-          ) : (
-            <>Get started</>
-          )}
-        </p>
-
-        <div className={styles.buttons}>
-          {session ? (
-            <Link href={"/game/field"}>Go to game</Link>
-          ) : (
-            <Link href={""} onClick={() => signIn()}>
-              Sign in
-            </Link>
-          )}
-        </div>
+        {session ? <LoggedLayout session={session} /> : <DefaultLayout />}
       </main>
     </div>
   );
+}
+
+function DefaultLayout() {
+  return (
+    <>
+      <p className={styles.description}>Get started</p>
+
+      <div className={styles.buttons}>
+        <Link href={""} onClick={() => signIn()}>
+          Sign in
+        </Link>
+      </div>
+    </>
+  );
+}
+
+function LoggedLayout({ session }: { session: Session }) {
+  return (
+    <>
+      <p className={styles.description}>
+        Logged as <span className={styles.login}>{session.user.name}</span>
+      </p>
+
+      <div className={styles.buttons}>
+        <Link href={"/games"}>Show games</Link>
+      </div>
+    </>
+  );
+}
+
+export async function getServerSideProps(context: any) {
+  return {
+    props: { authSession: await getSession(context) },
+  };
 }

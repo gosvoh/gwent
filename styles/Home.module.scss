@@ -33,6 +33,9 @@
 .buttons {
   max-width: 25%;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 
   a {
     padding: 0.5rem;
@@ -40,6 +43,7 @@
     background-color: hsl(220, 100%, 30%);
     display: block;
     text-align: center;
+    color: white;
 
     &:hover {
       background-color: hsl(220, 100%, 40%);
