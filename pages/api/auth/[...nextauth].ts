@@ -18,12 +18,12 @@ export default NextAuth({
           credentials.username,
           credentials.password
         );
-        if (res[0].ERROR) throw new Error(res[0].ERROR[0]);
+        if (res[0].ERROR) throw new Error(res[0].ERROR);
         const user = {
           id: "id",
           name: credentials.username,
           email: undefined,
-          token: res[0].token[0],
+          token: res[0].token,
         };
 
         if (user) return user;
