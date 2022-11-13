@@ -1,35 +1,66 @@
-import { useSession, signIn, getSession } from "next-auth/react";
-import Router from "next/router";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Session } from "next-auth";
 import { requireAuth } from "../utils/utils";
+import post from "../utils/request.manager";
+import styles from "../styles/Games.module.scss";
+import { useRouter } from "next/router";
+import Logout from "../components/logout";
+import { Session } from "next-auth";
 
-type Game = {
-  id: number;
-  opponent: string;
-  turn: string;
-};
+export default function Games({
+  authSession: session,
+  games,
+}: {
+  authSession: Session;
+  games: any;
+}) {
+  const router = useRouter();
 
-export default function Games({ session }: { session: Session }) {
-  const [games, setGames] = useState<Game[]>([]);
+  if (games[0].ERROR) {
+    return (
+      <div>
+        <h1>Games</h1>
+        <p>{games[0].ERROR}</p>
+        <Logout token={session.user.token} />
+      </div>
+    );
+  }
 
   return (
     <div>
-      <h1>Games</h1>
-      {/* {games.map((game) => (
-        <div key={game.id}>
-          <Link href={`/games/${game.id}`}>{game.id}</Link>
-        </div>
-      ))} */}
+      <h1 className={styles.title}>Games</h1>
+      <table className={styles.gameList}>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Opponent</th>
+            <th>Turn</th>
+          </tr>
+        </thead>
+        <tbody>
+          {games.map((game: any) => (
+            <tr key={game.id}>
+              <td>{game.id}</td>
+              <td>{game.opponent}</td>
+              <td>{game.turn === null ? session.user.name : game.turn}</td>
+              <td>
+                <button
+                  onClick={async () => await router.push("/games/" + game.id)}
+                >
+                  Start
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
 
 export async function getServerSideProps(context: any) {
-  return requireAuth(context, ({ session }: any) => {
+  return requireAuth(context, async ({ session }: any) => {
+    const games = await post("showGames", session.user.token);
     return {
-      props: { session },
+      props: { authSession: session, games },
     };
   });
 }

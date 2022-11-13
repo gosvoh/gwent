@@ -1,0 +1,18 @@
+.gameList {
+  border-collapse: collapse;
+  border: 1px solid black;
+
+  th, td {
+    border: 1px solid black;
+    padding: 0.5rem 1rem;
+    text-align: center;
+  }
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.title {
+  text-align: center;
+}
