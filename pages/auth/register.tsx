@@ -1,10 +1,10 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import post from "../../utils/request.manager";
 import styles from "../../styles/auth/Register.module.scss";
-import { getSession, signIn } from "next-auth/react";
-import { requireAuth, requireNonAuth } from "../../utils/utils";
+import { signIn } from "next-auth/react";
+import { requireNonAuth } from "../../utils/utils";
 
-export default function Register({ session }: any) {
+export default function Register() {
   const [response, setResponse] = useState("");
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -14,7 +14,7 @@ export default function Register({ session }: any) {
     let password = event.currentTarget.password.value;
     let response = await post("register", login, password);
     if (response[0].ERROR) setResponse(response[0].ERROR[0]);
-    else signIn("credentials", { username: login, password });
+    else await signIn("credentials", { username: login, password });
   };
 
   return (
