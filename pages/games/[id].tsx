@@ -1,6 +1,12 @@
 import styles from "../../styles/Field.module.scss";
 
-export default function Field() {
+type Game = {
+  id: number;
+  opponent: string;
+  turn: string;
+};
+
+function Field() {
   return (
     <div className={styles.field}>
       <div className={styles.players}>
@@ -28,3 +34,16 @@ export default function Field() {
     </div>
   );
 }
+
+export default function GamePage() {
+  return <Field />;
+}
+
+// export async function getServerSideProps(context: any) {
+//     const { id } = context.params;
+//     const game = await post("games/" + id);
+//
+//     return {
+//         props: { game },
+//     };
+// }
