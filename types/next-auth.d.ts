@@ -1,3 +1,5 @@
+import NextAuth from "next-auth";
+
 type User = {
   name: string;
   token: string;
