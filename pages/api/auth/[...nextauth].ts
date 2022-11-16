@@ -11,7 +11,6 @@ export default NextAuth({
       },
       async authorize(credentials) {
         if (!credentials || !credentials.username || !credentials.password)
-          // return null;
           throw new Error("Missing credentials");
         const res = await post(
           "login",

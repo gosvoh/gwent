@@ -25,5 +25,5 @@ export const requireNonAuth = async (context: any, callback?: any) => {
       },
     };
 
-  return callback({ session });
+  if (callback) return callback({ session });
 };

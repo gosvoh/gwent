@@ -35,5 +35,6 @@ export default function Register() {
 }
 
 export async function getServerSideProps(context: any) {
-  return requireNonAuth(context);
+  await requireNonAuth(context);
+  return { props: {} };
 }

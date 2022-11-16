@@ -15,8 +15,7 @@ async function post(
       reject("Error: " + response.statusText)
     );
   const data = await response.json();
-  if (data.ERROR)
-    return new Promise((resolve, reject) => reject(data.ERROR[0]));
+  if (data.ERROR) return new Promise((resolve, reject) => reject(data.ERROR));
   if (!data.RESULTS) return new Promise((resolve, reject) => reject("No data"));
   return data.RESULTS[0];
 }
