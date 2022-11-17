@@ -21,28 +21,22 @@ export default NextAuth({
         const user = {
           id: "id",
           name: credentials.username,
-          email: undefined,
           token: res[0].token,
         };
 
-        if (user) return user;
-        return null;
+        return user;
       },
     }),
   ],
   secret: "secret",
   callbacks: {
-    jwt: ({ token, user }) => {
-      if (user) {
-        // @ts-ignore
-        token.token = user.token;
-      }
-      return token;
-    },
-    session: ({ session, token }) => {
-      // @ts-ignore
+    session({ session, token }) {
       session.user.token = token.token;
       return session;
+    },
+    jwt({ token, user }) {
+      if (user) token.token = user.token;
+      return token;
     },
   },
 });

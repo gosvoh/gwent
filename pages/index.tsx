@@ -9,10 +9,6 @@ export default function Home({
 }: {
   authSession: Session;
 }) {
-  useEffect(() => {
-    console.log("session from index", session);
-  }, [session]);
-
   return (
     <div className={styles.container}>
       <main className={styles.main}>

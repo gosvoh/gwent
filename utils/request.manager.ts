@@ -1,4 +1,4 @@
-async function post(
+async function post<T>(
   procedureName: string,
   ...args: string[]
 ): Promise<Array<any>> {
