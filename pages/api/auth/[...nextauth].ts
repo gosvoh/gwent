@@ -29,6 +29,9 @@ export default NextAuth({
     }),
   ],
   secret: "secret",
+  session: {
+    maxAge: 30 * 60,
+  },
   callbacks: {
     session({ session, token }) {
       session.user.token = token.token;
