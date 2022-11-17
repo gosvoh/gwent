@@ -1,8 +1,8 @@
-import { requireAuth } from "../utils/utils";
-import post from "../utils/request.manager";
-import styles from "../styles/Games.module.scss";
+import { requireAuth } from "../../utils/utils";
+import post from "../../utils/request.manager";
+import styles from "../../styles/Games.module.scss";
 import { useRouter } from "next/router";
-import Logout from "../components/logout";
+import Logout from "../../components/logout";
 import { Session } from "next-auth";
 
 export default function Games({
@@ -14,7 +14,7 @@ export default function Games({
 }) {
   const router = useRouter();
 
-  if (games[0].ERROR) {
+  if (games[0] && games[0].ERROR) {
     return (
       <div>
         <h1>Games</h1>
@@ -25,7 +25,7 @@ export default function Games({
   }
 
   return (
-    <div>
+    <div className="width-container">
       <h1 className={styles.title}>Games</h1>
       <table className={styles.gameList}>
         <thead>
@@ -58,7 +58,12 @@ export default function Games({
 
 export async function getServerSideProps(context: any) {
   return requireAuth(context, async ({ session }: any) => {
-    const games = await post("showGames", session.user.token);
+    let games = [{ ERROR: "" }];
+    try {
+      games = await post("showGames", session.user.token);
+    } catch (error: any) {
+      games[0].ERROR = error;
+    }
     return {
       props: { authSession: session, games },
     };
