@@ -1,0 +1,25 @@
+.inviteList {
+  border-collapse: collapse;
+  border: 1px solid black;
+  width: 100%;
+  table-layout: fixed;
+
+  th,
+  td {
+    border: 1px solid black;
+    padding: 0.5rem 1rem;
+    text-align: center;
+  }
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.title {
+  text-align: center;
+}
+
+.inviteInput {
+  margin-inline: auto;
+}
