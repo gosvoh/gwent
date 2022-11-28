@@ -3,8 +3,7 @@ import { getSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import ErrorContainer from "../components/error.container";
-import post from "../utils/request.manager";
-import { requireAuth } from "../utils/utils";
+import { requireAuth, useMap } from "../utils/utils";
 import styles from "../styles/Invites.module.scss";
 
 type Invite = {
@@ -12,6 +11,7 @@ type Invite = {
   inviter: string;
   invited: string;
   dt: Date;
+  inviter_fraction: string;
 };
 
 const fractions = [
@@ -34,6 +34,11 @@ export default function Invites({
   const [login, setLogin] = useState("");
   const [fraction, setFraction] = useState(fractions[0]);
   const [isDirty, setIsDirty] = useState(false);
+  const [inviteFractions, setInviteFractions] = useMap<string, string>();
+
+  useEffect(() => {
+    if (!session) router.push("/login");
+  }, [session]);
 
   useEffect(() => {
     if (isDirty) {
@@ -71,8 +76,16 @@ export default function Invites({
     setIsDirty(true);
   };
 
-  const handleAcceptInvite = async (inviter: string) => {
-    setErrorMessage("Not implemented yet");
+  const handleAcceptInvite = async (key: string, inviter: string) => {
+    const res = await fetch("http://localhost:3000/api/acceptInvite", {
+      method: "POST",
+      body: JSON.stringify({
+        inviter,
+        fraction: inviteFractions.get(key) || fractions[0],
+      }),
+    });
+    // setIsDirty(true);
+    console.log(inviter, inviteFractions.get(key) || fractions[0]);
   };
 
   const handleCreateInvite = async (login: string, fraction: string) => {
@@ -96,35 +109,62 @@ export default function Invites({
             <th>Opponent</th>
             <th>Timestamp</th>
             <th>Action</th>
+            <th>Fraction</th>
           </tr>
         </thead>
         <tbody>
-          {invites.map((invite: Invite) => (
-            <tr key={invite.dt.toLocaleString()}>
-              <td>
-                {invite.inviter === session.user.name
-                  ? invite.invited
-                  : invite.inviter}
-              </td>
-              <td>{invite.dt.toString()}</td>
-              <td>
-                {invite.inviter === session.user.name ? (
-                  <button onClick={() => handleCancelInvite(invite.invited)}>
-                    Cancel
-                  </button>
-                ) : (
-                  <>
-                    <button onClick={() => handleAcceptInvite(invite.inviter)}>
-                      Accept
+          {invites.map((invite: Invite) => {
+            let key = invite.dt.toString();
+
+            return (
+              <tr key={key}>
+                <td>
+                  {invite.inviter === session.user.name
+                    ? invite.invited
+                    : invite.inviter}
+                </td>
+                <td>{invite.dt.toString()}</td>
+                <td className={styles.actions}>
+                  {invite.inviter === session.user.name ? (
+                    <button onClick={() => handleCancelInvite(invite.invited)}>
+                      Cancel
                     </button>
-                    <button onClick={() => handleDeclineInvite(invite.inviter)}>
-                      Decline
-                    </button>
-                  </>
-                )}
-              </td>
-            </tr>
-          ))}
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => handleAcceptInvite(key, invite.inviter)}
+                      >
+                        Accept
+                      </button>
+                      <button
+                        onClick={() => handleDeclineInvite(invite.inviter)}
+                      >
+                        Decline
+                      </button>
+                    </>
+                  )}
+                </td>
+                <td>
+                  {invite.inviter === session.user.name ? (
+                    invite.inviter_fraction
+                  ) : (
+                    <select
+                      value={inviteFractions.get(key)}
+                      onChange={(e) =>
+                        setInviteFractions.set(key, e.target.value)
+                      }
+                    >
+                      {fractions.map((fraction) => (
+                        <option key={fraction} value={fraction}>
+                          {fraction}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 
