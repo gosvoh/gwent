@@ -2,49 +2,6 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 import post from "./request.manager";
 import { EffectCallback, useCallback, useEffect, useState } from "react";
-import { unstable_getServerSession } from "next-auth";
-import { authOptions } from "../pages/api/auth/[...nextauth]";
-
-export const requireAuth = async (context: any, callback: any) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  );
-
-  const redirect = {
-    redirect: {
-      destination: "/",
-      permanent: false,
-    },
-  };
-
-  if (!session) return redirect;
-
-  const token = await post("checkToken", session.user.token);
-  console.log("token", token);
-  if (!token[0] || !token[0].token) return redirect;
-
-  return callback({ session });
-};
-
-export const requireNonAuth = async (context: any, callback?: any) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  );
-
-  if (session)
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-
-  if (callback) return callback({ session });
-};
 
 // TODO change this to a better name
 export async function getData<T>(

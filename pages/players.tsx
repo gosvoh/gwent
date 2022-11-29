@@ -1,6 +1,7 @@
 import { Session } from "next-auth";
 import { useEffect } from "react";
-import { requireAuth, useMap } from "../utils/utils";
+import { useMap } from "../utils/utils";
+import { requireAuth } from "../utils/auth.utils";
 import styles from "../styles/Players.module.scss";
 
 const fractions = [

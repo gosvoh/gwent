@@ -1,4 +1,4 @@
-import { requireAuth } from "../../utils/utils";
+import { requireAuth } from "../../utils/auth.utils";
 import styles from "../../styles/Games.module.scss";
 import { useRouter } from "next/router";
 import { Session } from "next-auth";

@@ -1,7 +1,8 @@
 import { Session } from "next-auth";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { requireAuth, useMap } from "../utils/utils";
+import { useMap } from "../utils/utils";
+import { requireAuth } from "../utils/auth.utils";
 import styles from "../styles/Invites.module.scss";
 
 type Invite = {

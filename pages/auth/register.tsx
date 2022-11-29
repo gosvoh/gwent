@@ -2,7 +2,7 @@ import { FormEvent, useState } from "react";
 import post from "../../utils/request.manager";
 import styles from "../../styles/auth/Register.module.scss";
 import { signIn } from "next-auth/react";
-import { requireNonAuth } from "../../utils/utils";
+import { requireNonAuth } from "../../utils/auth.utils";
 
 export default function Register() {
   const [response, setResponse] = useState("");
