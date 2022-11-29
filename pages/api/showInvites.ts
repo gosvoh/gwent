@@ -1,17 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getData } from "../../utils/utils";
 
-type Invite = {
-  inviter: string;
-  invited: string;
-  dt: Date;
-};
-
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Invite[]>
+  res: NextApiResponse
 ) {
-  let invites = await getData<Invite[]>(req, res, "showInvites");
+  let invites = await getData(req, res, "showInvites");
   if (!invites) return;
 
   res.json(invites);

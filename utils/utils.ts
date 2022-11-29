@@ -7,13 +7,18 @@ import { useCallback, useState } from "react";
 export const requireAuth = async (context: any, callback: any) => {
   const session = await getSession(context);
 
-  if (!session)
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
+  const redirect = {
+    redirect: {
+      destination: "/",
+      permanent: false,
+    },
+  };
+
+  if (!session) return redirect;
+
+  const token = await post("checkToken", session.user.token);
+  console.log("token", token);
+  if (!token[0] || !token[0].token) return redirect;
 
   return callback({ session });
 };
@@ -46,7 +51,7 @@ export async function getData<T>(
     return null;
   }
   const data = await post(procedureName, token.token, ...args);
-  if (data[0] && data[0].ERROR) res.status(401);
+  if (data[0] && data[0].ERROR) res.status(400);
   else res.status(200);
   return data;
 }
