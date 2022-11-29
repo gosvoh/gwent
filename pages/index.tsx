@@ -1,14 +1,22 @@
 import styles from "../styles/Home.module.scss";
-import { getSession, signIn } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { Session } from "next-auth";
-import { useEffect } from "react";
+import { Session, unstable_getServerSession } from "next-auth";
+import post from "../utils/request.manager";
+import { useEffectOnce } from "../utils/utils";
+import { authOptions } from "./api/auth/[...nextauth]";
 
 export default function Home({
   authSession: session,
 }: {
-  authSession: Session;
+  authSession: Session | null;
 }) {
+  useEffectOnce(() => {
+    post("checkToken").then((res) => {
+      if (!res[0] || !res[0].token) session = null;
+    });
+  });
+
   return (
     <div className={styles.container}>
       <main className={styles.main}>
@@ -50,6 +58,12 @@ function LoggedLayout({ session }: { session: Session }) {
 
 export async function getServerSideProps(context: any) {
   return {
-    props: { authSession: await getSession(context) },
+    props: {
+      authSession: await unstable_getServerSession(
+        context.req,
+        context.res,
+        authOptions
+      ),
+    },
   };
 }

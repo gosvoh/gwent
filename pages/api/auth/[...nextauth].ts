@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import post from "../../../utils/request.manager";
 
-export default NextAuth({
+export const authOptions = {
   providers: [
     CredentialsProvider({
       credentials: {
@@ -33,13 +33,15 @@ export default NextAuth({
     maxAge: 30 * 60,
   },
   callbacks: {
-    session({ session, token }) {
+    session({ session, token }: any) {
       session.user.token = token.token;
       return session;
     },
-    jwt({ token, user }) {
+    jwt({ token, user }: any) {
       if (user) token.token = user.token;
       return token;
     },
   },
-});
+};
+
+export default NextAuth(authOptions);

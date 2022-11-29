@@ -1,11 +1,16 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
-import { getSession } from "next-auth/react";
 import post from "./request.manager";
-import { useCallback, useState } from "react";
+import { EffectCallback, useCallback, useEffect, useState } from "react";
+import { unstable_getServerSession } from "next-auth";
+import { authOptions } from "../pages/api/auth/[...nextauth]";
 
 export const requireAuth = async (context: any, callback: any) => {
-  const session = await getSession(context);
+  const session = await unstable_getServerSession(
+    context.req,
+    context.res,
+    authOptions
+  );
 
   const redirect = {
     redirect: {
@@ -24,7 +29,11 @@ export const requireAuth = async (context: any, callback: any) => {
 };
 
 export const requireNonAuth = async (context: any, callback?: any) => {
-  const session = await getSession(context);
+  const session = await unstable_getServerSession(
+    context.req,
+    context.res,
+    authOptions
+  );
 
   if (session)
     return {
@@ -104,4 +113,9 @@ export function useMap<K, V>(
   };
 
   return [map, actions];
+}
+
+export function useEffectOnce(effect: EffectCallback) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(effect, []);
 }
