@@ -5,9 +5,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  let invites = await getData(req, res, "showInvites");
-  if (!invites) return;
+  let games = await getData(req, res, "showGames");
+  if (!games) return;
 
-  res.json(invites);
+  res.json(games);
   res.end();
 }

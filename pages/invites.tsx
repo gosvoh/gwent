@@ -1,8 +1,6 @@
 import { Session } from "next-auth";
-import { getSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import ErrorContainer from "../components/error.container";
 import { requireAuth, useMap } from "../utils/utils";
 import styles from "../styles/Invites.module.scss";
 
@@ -37,10 +35,6 @@ export default function Invites({
   const [inviteFractions, setInviteFractions] = useMap<string, string>();
 
   useEffect(() => {
-    if (!session) router.push("/login");
-  }, [session]);
-
-  useEffect(() => {
     if (isDirty) {
       router.replace(router.asPath);
       setIsDirty(false);
@@ -51,32 +45,23 @@ export default function Invites({
     if (errorMessage) setTimeout(() => setErrorMessage(""), 5000);
   }, [errorMessage]);
 
-  if (invites[0] && invites[0].ERROR)
-    return (
-      <ErrorContainer errorMessage={invites[0].ERROR}>
-        {invites[0].ERROR === "Token has expired" && (
-          <button onClick={() => signOut()}>Sign out</button>
-        )}
-      </ErrorContainer>
-    );
-
-  const handleCancelInvite = async (invited: string) => {
+  async function handleCancelInvite(invited: string) {
     await fetch("http://localhost:3000/api/cancelInvite", {
       method: "POST",
       body: JSON.stringify({ invited }),
     });
     setIsDirty(true);
-  };
+  }
 
-  const handleDeclineInvite = async (inviter: string) => {
+  async function handleDeclineInvite(inviter: string) {
     await fetch("http://localhost:3000/api/declineInvite", {
       method: "POST",
       body: JSON.stringify({ inviter }),
     });
     setIsDirty(true);
-  };
+  }
 
-  const handleAcceptInvite = async (key: string, inviter: string) => {
+  async function handleAcceptInvite(key: string, inviter: string) {
     const res = await fetch("http://localhost:3000/api/acceptInvite", {
       method: "POST",
       body: JSON.stringify({
@@ -84,11 +69,10 @@ export default function Invites({
         fraction: inviteFractions.get(key) || fractions[0],
       }),
     });
-    // setIsDirty(true);
-    console.log(inviter, inviteFractions.get(key) || fractions[0]);
-  };
+    setIsDirty(true);
+  }
 
-  const handleCreateInvite = async (login: string, fraction: string) => {
+  async function handleCreateInvite(login: string, fraction: string) {
     const res = await fetch("http://localhost:3000/api/createInvite", {
       method: "POST",
       body: JSON.stringify({ login, fraction }),
@@ -98,7 +82,7 @@ export default function Invites({
       const data = await res.json();
       setErrorMessage(data[0].ERROR);
     }
-  };
+  }
 
   return (
     <div className="width-container">
@@ -113,6 +97,11 @@ export default function Invites({
           </tr>
         </thead>
         <tbody>
+          {invites.length === 0 && (
+            <tr>
+              <td colSpan={4}>No invites</td>
+            </tr>
+          )}
           {invites.map((invite: Invite) => {
             let key = invite.dt.toString();
 

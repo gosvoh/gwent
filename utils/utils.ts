@@ -1,25 +1,39 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
-import { getSession } from "next-auth/react";
 import post from "./request.manager";
-import { useCallback, useState } from "react";
+import { EffectCallback, useCallback, useEffect, useState } from "react";
+import { unstable_getServerSession } from "next-auth";
+import { authOptions } from "../pages/api/auth/[...nextauth]";
 
 export const requireAuth = async (context: any, callback: any) => {
-  const session = await getSession(context);
+  const session = await unstable_getServerSession(
+    context.req,
+    context.res,
+    authOptions
+  );
 
-  if (!session)
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
+  const redirect = {
+    redirect: {
+      destination: "/",
+      permanent: false,
+    },
+  };
+
+  if (!session) return redirect;
+
+  const token = await post("checkToken", session.user.token);
+  console.log("token", token);
+  if (!token[0] || !token[0].token) return redirect;
 
   return callback({ session });
 };
 
 export const requireNonAuth = async (context: any, callback?: any) => {
-  const session = await getSession(context);
+  const session = await unstable_getServerSession(
+    context.req,
+    context.res,
+    authOptions
+  );
 
   if (session)
     return {
@@ -46,7 +60,7 @@ export async function getData<T>(
     return null;
   }
   const data = await post(procedureName, token.token, ...args);
-  if (data[0] && data[0].ERROR) res.status(401);
+  if (data[0] && data[0].ERROR) res.status(400);
   else res.status(200);
   return data;
 }
@@ -99,4 +113,9 @@ export function useMap<K, V>(
   };
 
   return [map, actions];
+}
+
+export function useEffectOnce(effect: EffectCallback) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(effect, []);
 }
