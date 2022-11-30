@@ -3,7 +3,6 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Session, unstable_getServerSession } from "next-auth";
 import post from "../utils/request.manager";
-import { useEffectOnce } from "../utils/utils";
 import { authOptions } from "./api/auth/[...nextauth]";
 
 export default function Home({
@@ -11,12 +10,6 @@ export default function Home({
 }: {
   authSession: Session | null;
 }) {
-  useEffectOnce(() => {
-    post("checkToken").then((res) => {
-      if (!res[0] || !res[0].token) session = null;
-    });
-  });
-
   return (
     <div className={styles.container}>
       <main className={styles.main}>
@@ -57,13 +50,18 @@ function LoggedLayout({ session }: { session: Session }) {
 }
 
 export async function getServerSideProps(context: any) {
+  let authSession = await unstable_getServerSession(
+    context.req,
+    context.res,
+    authOptions
+  );
+
+  let checkToken = await post("checkToken", authSession?.user?.token as string);
+  if (!checkToken[0] || !checkToken[0].token) authSession = null;
+
   return {
     props: {
-      authSession: await unstable_getServerSession(
-        context.req,
-        context.res,
-        authOptions
-      ),
+      authSession,
     },
   };
 }
