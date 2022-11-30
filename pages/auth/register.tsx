@@ -1,20 +1,25 @@
 import { FormEvent, useState } from "react";
-import post from "../../utils/request.manager";
 import styles from "../../styles/auth/Register.module.scss";
 import { signIn } from "next-auth/react";
 import { requireNonAuth } from "../../utils/auth.utils";
 
-export default function Register() {
+export default function Register({ context }: any) {
   const [response, setResponse] = useState("");
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setResponse("");
+    if (response) setResponse("");
     let login = event.currentTarget.login.value;
     let password = event.currentTarget.password.value;
-    let response = await post("register", login, password);
-    if (response[0].ERROR) setResponse(response[0].ERROR[0]);
-    else await signIn("credentials", { username: login, password });
+
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ login, password }),
+    });
+
+    if (res.status === 200)
+      await signIn("credentials", { username: login, password });
+    else setResponse(await res.json());
   };
 
   return (
@@ -35,6 +40,9 @@ export default function Register() {
 }
 
 export async function getServerSideProps(context: any) {
-  await requireNonAuth(context);
-  return { props: {} };
+  let red = await requireNonAuth(context);
+  if (red) return { redirect: red.redirect, props: {} };
+  return {
+    props: {},
+  };
 }
