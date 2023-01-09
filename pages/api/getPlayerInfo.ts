@@ -5,10 +5,10 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (req.method === "GET") return;
+  let gameId = req.query.gameId as string;
+  let playerInfo = await getData(req, res, "getPlayerInfo", gameId);
+  if (!playerInfo) return;
 
-  const { game_id } = JSON.parse(req.body);
-  let result = await getData(req, res, "deleteGame", game_id);
-  if (!result) return;
+  res.json(playerInfo);
   res.end();
 }

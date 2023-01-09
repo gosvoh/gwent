@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "docker:build": "docker build -t nextjs-docker .",
+    "docker:run": "docker run -p 3000:3000 nextjs-docker",
+    "force:update": "rm -rf node_modules && rm package-lock.json && npm install"
   },
   "dependencies": {
     "eslint": "^8.27.0",

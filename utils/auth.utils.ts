@@ -18,9 +18,12 @@ export async function requireAuth(context: any, callback: any) {
 
   if (!session) return redirect;
 
-  const token = await post("checkToken", session.user.token);
-  console.log("token", token);
-  if (!token[0] || !token[0].token) return redirect;
+  try {
+    const token = await post("checkToken", session.user.token);
+    if (!token[0] || !token[0].token) return redirect;
+  } catch (error) {
+    return redirect;
+  }
 
   return callback({ session });
 }

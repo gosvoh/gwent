@@ -39,7 +39,7 @@ export const authOptions = {
     },
     jwt({ token, user }: any) {
       if (user) token.token = user.token;
-      return token;
+      return { ...token, ...user };
     },
   },
 };

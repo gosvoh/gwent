@@ -5,7 +5,7 @@ import { requireAuth } from "../utils/auth.utils";
 import styles from "../styles/Players.module.scss";
 
 const fractions = [
-  "Чудовища",
+  "Монстры",
   "Нильфгаард",
   "Королевства Севера",
   "Скеллиге",

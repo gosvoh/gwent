@@ -7,7 +7,7 @@ export default async function handler(
 ) {
   if (req.method === "GET") return;
 
-  const inviter = JSON.parse(req.body).inviter;
+  const { inviter } = JSON.parse(req.body);
   let result = await getData(req, res, "declineInvite", inviter);
   if (!result) return;
   res.end();
