@@ -61,7 +61,6 @@ interface GameFieldProps {
 }
 
 function GameField({ opponent, me, deck }: GameFieldProps) {
-  opponent.tokens = 1;
   return (
     <div className={styles.field}>
       <div className={styles.players}>
@@ -143,6 +142,8 @@ function GameField({ opponent, me, deck }: GameFieldProps) {
       </div>
     </div>
   );
+
+  function selectCard(card: Card): void {}
 }
 
 interface SelectCardsProps {
