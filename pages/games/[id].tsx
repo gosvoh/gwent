@@ -1,7 +1,8 @@
+import { randomBytes } from "crypto";
 import { Session } from "next-auth";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { CSSProperties, forwardRef, Ref, useState } from "react";
 import styles from "../../styles/Field.module.scss";
 import { requireAuth } from "../../utils/auth.utils";
 
@@ -21,23 +22,23 @@ type Player = {
 
 type Card = {
   name: string;
-  type: "squad" | "special";
-  selected: boolean;
+  type?: "squad" | "special";
+  selected?: boolean;
 };
 
-interface FieldProps {
+interface GameProps {
   authSession: Session;
   playerInfo: Player[];
   deck: Card[];
   cards: Card[];
 }
 
-export default function Field({
+export default function Game({
   authSession,
   playerInfo,
   deck,
   cards,
-}: FieldProps) {
+}: GameProps) {
   let opponent: Player =
     playerInfo[0].login === authSession.user.name
       ? playerInfo[1]
@@ -47,48 +48,79 @@ export default function Field({
       ? playerInfo[0]
       : playerInfo[1];
 
-  if (deck.length === 0)
-    return <SelectCards cards={cards} fraction={me.fraction} />;
-  else return <GameField me={me} opponent={opponent} />;
+  if (deck.length === 0) {
+    if (me.ready) return <p>Waiting for opponent</p>;
+    else return <SelectCards cards={cards} fraction={me.fraction} />;
+  } else return <GameField me={me} opponent={opponent} deck={deck} />;
 }
 
 interface GameFieldProps {
   opponent: Player;
   me: Player;
+  deck: Card[];
 }
 
-function GameField({ opponent, me }: GameFieldProps) {
+function GameField({ opponent, me, deck }: GameFieldProps) {
+  opponent.tokens = 1;
   return (
     <div className={styles.field}>
       <div className={styles.players}>
         <div className={styles.player}>
-          <div
+          <CardComponent
+            card={{ name: opponent.leader }}
+            fraction={opponent.fraction}
             className={styles.playerLeader}
-            style={{
-              backgroundImage: `url(/assets/${encodeURI(
-                opponent.fraction
-              )}/${encodeURI(opponent.leader)}.jpeg)`,
-            }}
-          ></div>
+          />
           <div className={styles.playerInfo}>
-            <p>{opponent.login}</p>
-            <p>{opponent.tokens}</p>
+            <p className={styles.playerLogin}>{opponent.login}</p>
+            <div className={styles.tokens}>
+              {opponent.tokens > 0 &&
+                Array(opponent.tokens)
+                  .fill(0)
+                  .map((_, i) => (
+                    <div className={styles.token}>
+                      <Image
+                        key={i}
+                        src={`/assets/${encodeURI(
+                          opponent.fraction
+                        )}/Фишка.jpeg`}
+                        alt="token"
+                        fill
+                        sizes="100%"
+                      />
+                    </div>
+                  ))}
+            </div>
           </div>
         </div>
         <div className={styles.player}>
-          <div
+          <CardComponent
+            card={{ name: me.leader }}
+            fraction={me.fraction}
             className={styles.playerLeader}
-            style={{
-              backgroundImage: `url(/assets/${encodeURI(
-                me.fraction
-              )}/${encodeURI(me.leader)}.jpeg)`,
-            }}
-          ></div>
+          />
           <div className={styles.playerInfo}>
-            <p>{me.tokens}</p>
-            <div>Show deck</div>
-            <button>Show beat</button>
-            {opponent.ready && <button>End turn</button>}
+            <div className={styles.tokens}>
+              {me.tokens > 0 &&
+                Array(me.tokens)
+                  .fill(0)
+                  .map((_, i) => (
+                    <div className={styles.token}>
+                      <Image
+                        key={i}
+                        src={`/assets/${encodeURI(me.fraction)}/Фишка.jpeg`}
+                        alt="token"
+                        fill
+                        sizes="100%"
+                      />
+                    </div>
+                  ))}
+            </div>
+            <div className={styles.actions}>
+              <button>Show deck</button>
+              <button>Show beat</button>
+              {opponent.ready ? <button>End turn</button> : null}
+            </div>
           </div>
         </div>
       </div>
@@ -99,6 +131,15 @@ function GameField({ opponent, me }: GameFieldProps) {
         <div>My rp</div>
         <div>My db</div>
         <div>My os</div>
+      </div>
+      <div className={styles.deckGrid}>
+        {deck.map((card) => (
+          <CardComponent
+            card={card}
+            key={randomBytes(16).toString("hex")}
+            fraction={me.fraction}
+          />
+        ))}
       </div>
     </div>
   );
@@ -112,6 +153,8 @@ interface SelectCardsProps {
 function SelectCards({ cards, fraction }: SelectCardsProps) {
   let [squadCards, setSquadCards] = useState<Card[]>([]);
   let [specialCards, setSpecialCards] = useState<Card[]>([]);
+  let router = useRouter();
+  let iterator = 0;
 
   return (
     <>
@@ -121,6 +164,7 @@ function SelectCards({ cards, fraction }: SelectCardsProps) {
             card={card}
             fraction={fraction}
             onClick={() => selectCard(card)}
+            key={card.name + iterator++}
           />
         ))}
       </div>
@@ -160,34 +204,64 @@ function SelectCards({ cards, fraction }: SelectCardsProps) {
     }
   }
 
-  function sendCards(): void {
+  async function sendCards(): Promise<void> {
     if (squadCards.length < 22) return;
     if (specialCards.length > 10) return;
+
+    // concat both arrays with comma and send to addCardsToDeck api
+    let req = await fetch(
+      `http://localhost:3000/api/addCardsToDeck?gameId=${router.query.id}`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          cards: [...squadCards, ...specialCards].map((card) => card.name),
+        }),
+      }
+    );
+
+    if (req.status === 200) router.push(`/games/${router.query.id}`);
   }
 }
 
-function CardComponent({
-  card,
-  fraction,
-  onClick,
-}: {
-  card: Card;
-  fraction: string;
-  onClick?: () => void;
-}) {
-  let style = [styles.card];
-  if (card.selected) style.push(styles.selected);
+const CardComponent = forwardRef(
+  (
+    {
+      card,
+      fraction,
+      onClick,
+      className,
+      style,
+    }: {
+      card: Card;
+      fraction: string;
+      onClick?: () => void;
+      className?: string;
+      style?: CSSProperties;
+    },
+    ref: Ref<HTMLDivElement>
+  ) => {
+    let classNames = [];
+    if (className) classNames.push(className);
+    else classNames.push(styles.card);
+    if (card.selected) classNames.push(styles.selected);
 
-  return (
-    <div className={style.join(" ")} onClick={onClick}>
-      <Image
-        src={`/assets/${encodeURI(fraction)}/${encodeURI(card.name)}.jpeg`}
-        fill
-        alt={`${card.name} from ${fraction}`}
-      />
-    </div>
-  );
-}
+    return (
+      <div
+        className={classNames.join(" ")}
+        onClick={onClick}
+        style={style}
+        ref={ref}
+      >
+        <Image
+          src={`/assets/${encodeURI(fraction)}/${encodeURI(card?.name)}.jpeg`}
+          fill
+          sizes="100%"
+          alt={`${card.name} from ${fraction}`}
+        />
+      </div>
+    );
+  }
+);
 
 export async function getServerSideProps(context: any) {
   return requireAuth(context, async ({ session }: any) => {
@@ -203,7 +277,7 @@ export async function getServerSideProps(context: any) {
     let playerInfoData: Player[] = await playerInfo.json();
 
     let deck = await fetch(
-      `http://localhost:3000/api/showDeck?gameId=${context.params.id}`,
+      `http://localhost:3000/api/showGameDeck?gameId=${context.params.id}`,
       {
         method: "GET",
         headers: {
@@ -211,7 +285,7 @@ export async function getServerSideProps(context: any) {
         },
       }
     );
-    let deckData: string[] = await deck.json();
+    let deckData: Card[] = await deck.json();
 
     let cardsData: Card[] = [];
     if (deckData.length === 0) {
