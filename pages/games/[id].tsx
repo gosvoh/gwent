@@ -222,45 +222,37 @@ function SelectCards({ cards, fraction }: SelectCardsProps) {
   }
 }
 
-const CardComponent = forwardRef(
-  (
-    {
-      card,
-      fraction,
-      onClick,
-      className,
-      style,
-    }: {
-      card: Card;
-      fraction: string;
-      onClick?: () => void;
-      className?: string;
-      style?: CSSProperties;
-    },
-    ref: Ref<HTMLDivElement>
-  ) => {
-    let classNames = [];
-    if (className) classNames.push(className);
-    else classNames.push(styles.card);
-    if (card.selected) classNames.push(styles.selected);
+interface CardComponentInterface {
+  card: Card;
+  fraction: string;
+  onClick?: () => void;
+  className?: string;
+  style?: CSSProperties;
+}
 
-    return (
-      <div
-        className={classNames.join(" ")}
-        onClick={onClick}
-        style={style}
-        ref={ref}
-      >
-        <Image
-          src={`/assets/${encodeURI(fraction)}/${encodeURI(card?.name)}.jpeg`}
-          fill
-          sizes="100%"
-          alt={`${card.name} from ${fraction}`}
-        />
-      </div>
-    );
-  }
-);
+function CardComponent({
+  card,
+  fraction,
+  onClick,
+  className,
+  style,
+}: CardComponentInterface) {
+  let classNames = [];
+  if (className) classNames.push(className);
+  else classNames.push(styles.card);
+  if (card.selected) classNames.push(styles.selected);
+
+  return (
+    <div className={classNames.join(" ")} onClick={onClick} style={style}>
+      <Image
+        src={`/assets/${encodeURI(fraction)}/${encodeURI(card?.name)}.jpeg`}
+        fill
+        sizes="100%"
+        alt={`${card.name} from ${fraction}`}
+      />
+    </div>
+  );
+}
 
 export async function getServerSideProps(context: any) {
   return requireAuth(context, async ({ session }: any) => {
