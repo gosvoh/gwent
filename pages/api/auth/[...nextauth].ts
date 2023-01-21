@@ -35,6 +35,8 @@ export const authOptions = {
   callbacks: {
     session({ session, token }: any) {
       session.user.token = token.token;
+      session.user.email = null;
+      session.user.image = null;
       return session;
     },
     jwt({ token, user }: any) {
