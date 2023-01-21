@@ -1,6 +1,6 @@
 .field {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 1fr 2fr 0.75fr;
   gap: 0.5rem;
   justify-items: center;
   align-items: center;
@@ -17,32 +17,65 @@
   .rows {
     width: 100%;
     height: 100%;
-    background-color: red;
+
+    > div {
+      background-color: red;
+    }
   }
 
   .players {
     grid-template-rows: 1fr 1fr;
+    color: white;
 
     .player {
-      width: 100%;
-      height: 100%;
       background-color: red;
-      display: grid;
-      grid-template-rows: 1fr auto;
-      justify-items: center;
+      display: flex;
+      flex-direction: row;
 
       .playerLeader {
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
         aspect-ratio: 709/1346;
+        position: relative;
+        flex: 0;
       }
 
       .playerInfo {
-        background-color: green;
+        background-color: black;
         display: flex;
-        flex-direction: row;
-        width: 100%;
+        flex-direction: column;
+        flex: 1;
+        gap: 0.5rem;
+
+        .actions,
+        .playerLogin {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          justify-content: center;
+          text-align: center;
+
+          > * {
+            flex: 1;
+          }
+        }
+
+        .playerLogin {
+          font-size: large;
+          margin: 0;
+        }
+
+        .tokens {
+          display: flex;
+          flex-direction: row;
+          flex: 0;
+          gap: 0.5rem;
+
+          .token {
+            position: relative;
+            aspect-ratio: 1/1;
+            flex: 1;
+          }
+        }
       }
     }
   }
@@ -56,6 +89,11 @@
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 1rem;
+  min-height: 100%;
+}
+
+.cardsGrid,
+.deckGrid {
   width: 100%;
 
   .card {
@@ -75,6 +113,16 @@
     img {
       z-index: -1;
     }
+  }
+}
+
+.deckGrid {
+  height: 0;
+  min-height: 100%;
+  overflow-y: scroll;
+
+  > div:not(:last-child) {
+    margin-bottom: 1rem;
   }
 }
 
