@@ -77,9 +77,8 @@ function GameField({ opponent, me, deck }: GameFieldProps) {
                 Array(opponent.tokens)
                   .fill(0)
                   .map((_, i) => (
-                    <div className={styles.token}>
+                    <div className={styles.token} key={i}>
                       <Image
-                        key={i}
                         src={`/assets/${encodeURI(
                           opponent.fraction
                         )}/Фишка.jpeg`}
@@ -104,9 +103,8 @@ function GameField({ opponent, me, deck }: GameFieldProps) {
                 Array(me.tokens)
                   .fill(0)
                   .map((_, i) => (
-                    <div className={styles.token}>
+                    <div className={styles.token} key={i}>
                       <Image
-                        key={i}
                         src={`/assets/${encodeURI(me.fraction)}/Фишка.jpeg`}
                         alt="token"
                         fill
