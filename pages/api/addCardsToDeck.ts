@@ -17,7 +17,6 @@ export default async function handler(
     cards.join(",")
   );
   if (!result) return;
-  console.log("addCardsToDeck result", result);
   res.json(result);
   res.end();
 }

@@ -36,6 +36,17 @@ export default function Invites({
   const [inviteFractions, setInviteFractions] = useMap<string, string>();
 
   useEffect(() => {
+    invites.forEach((invite) => {
+      setInviteFractions.set(
+        invite.dt.toString(),
+        fractions[
+          (fractions.indexOf(invite.inviter_fraction) + 1) % fractions.length
+        ]
+      );
+    });
+  }, [invites]);
+
+  useEffect(() => {
     if (isDirty) {
       router.replace(router.asPath);
       setIsDirty(false);
@@ -63,6 +74,7 @@ export default function Invites({
   }
 
   async function handleAcceptInvite(key: string, inviter: string) {
+    console.log("handleAcceptInvite", key, inviteFractions.get(key));
     const res = await fetch("http://localhost:3000/api/acceptInvite", {
       method: "POST",
       body: JSON.stringify({
@@ -94,7 +106,7 @@ export default function Invites({
             <th>Opponent</th>
             <th>Timestamp</th>
             <th>Action</th>
-            <th>Fraction</th>
+            <th>Choose your fraction</th>
           </tr>
         </thead>
         <tbody>
@@ -140,15 +152,22 @@ export default function Invites({
                   ) : (
                     <select
                       value={inviteFractions.get(key)}
+                      onLoad={(e) =>
+                        // setInviteFractions.set(key, e.target.value)
+                        console.log("onLoad", e)
+                      }
                       onChange={(e) =>
                         setInviteFractions.set(key, e.target.value)
                       }
                     >
-                      {fractions.map((fraction) => (
-                        <option key={fraction} value={fraction}>
-                          {fraction}
-                        </option>
-                      ))}
+                      {fractions.map((fraction) => {
+                        if (fraction === invite.inviter_fraction) return;
+                        return (
+                          <option key={fraction} value={fraction}>
+                            {fraction}
+                          </option>
+                        );
+                      })}
                     </select>
                   )}
                 </td>

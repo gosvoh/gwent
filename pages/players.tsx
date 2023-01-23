@@ -22,10 +22,6 @@ export default function PlayersList({
   const [inviteFractions, setInviteFractions] = useMap<string, string>();
   const [errorMessages, setErrorMessages] = useMap<string, string>();
 
-  useEffect(() => {
-    console.log(errorMessages);
-  }, [errorMessages]);
-
   async function handleInvite(login: string) {
     let res = await fetch("http://localhost:3000/api/createInvite", {
       method: "POST",
