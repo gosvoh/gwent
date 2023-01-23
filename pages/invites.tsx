@@ -152,10 +152,6 @@ export default function Invites({
                   ) : (
                     <select
                       value={inviteFractions.get(key)}
-                      onLoad={(e) =>
-                        // setInviteFractions.set(key, e.target.value)
-                        console.log("onLoad", e)
-                      }
                       onChange={(e) =>
                         setInviteFractions.set(key, e.target.value)
                       }
