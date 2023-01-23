@@ -22,27 +22,63 @@
     padding: 0 0.5rem;
 
     > div {
-      background-color: red;
+      outline: 1px solid currentColor;
+      position: relative;
+      display: flex;
+
+      &.canBePlaced {
+        outline: 3px solid lawngreen;
+        outline-offset: -3px;
+        cursor: pointer;
+      }
+
+      > p {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 2rem;
+        font-weight: bold;
+        color: currentColor;
+        opacity: 0.25;
+        z-index: -1;
+      }
     }
   }
 
   .players {
     grid-template-rows: 1fr 1fr;
     color: white;
+    background-color: white;
+    gap: 0.125rem;
 
     .player {
-      background-color: red;
+      padding: 0.5rem;
+      background-color: black;
       display: flex;
       flex-direction: row;
+
+      &:not(:last-child) {
+        // border between players
+        border-bottom: 1px solid currentColor;
+      }
 
       .playerLeader {
         aspect-ratio: 709/1346;
         position: relative;
         flex: 0;
+
+        &.active > * {
+          outline: 2.5px solid red;
+          outline-offset: -5px;
+        }
       }
 
       .playerInfo {
-        background-color: black;
         display: flex;
         flex-direction: column;
         flex: 1;
@@ -60,6 +96,10 @@
           > * {
             flex: 1;
           }
+        }
+
+        .actions button:not(:disabled) {
+          cursor: pointer;
         }
 
         .playerLogin {
@@ -99,7 +139,11 @@
 .cardsGrid,
 .deckGrid {
   width: 100%;
+}
 
+.cardsGrid,
+.deckGrid,
+.field {
   .card {
     position: relative;
     aspect-ratio: 709/1346;
@@ -149,7 +193,7 @@
     background-color: darkgreen;
   }
 
-  &.disabled {
+  &:disabled {
     background-color: grey;
     cursor: not-allowed;
   }
