@@ -1,9 +1,9 @@
-import { Session } from "next-auth";
+import { getServerSession, Session } from "next-auth";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { useMap } from "../utils/utils";
-import { requireAuth } from "../utils/auth.utils";
+import { getData, useMap } from "../utils/utils";
 import styles from "../styles/Invites.module.scss";
+import { authOptions } from "./api/auth/[...nextauth]";
 
 type Invite = {
   ERROR?: string;
@@ -58,7 +58,7 @@ export default function Invites({
   }, [errorMessage]);
 
   async function handleCancelInvite(invited: string) {
-    await fetch("http://localhost:3000/api/cancelInvite", {
+    await fetch("/api/cancelInvite", {
       method: "POST",
       body: JSON.stringify({ invited }),
     });
@@ -66,7 +66,7 @@ export default function Invites({
   }
 
   async function handleDeclineInvite(inviter: string) {
-    await fetch("http://localhost:3000/api/declineInvite", {
+    await fetch("/api/declineInvite", {
       method: "POST",
       body: JSON.stringify({ inviter }),
     });
@@ -74,8 +74,7 @@ export default function Invites({
   }
 
   async function handleAcceptInvite(key: string, inviter: string) {
-    console.log("handleAcceptInvite", key, inviteFractions.get(key));
-    const res = await fetch("http://localhost:3000/api/acceptInvite", {
+    const res = await fetch("/api/acceptInvite", {
       method: "POST",
       body: JSON.stringify({
         inviter,
@@ -86,7 +85,7 @@ export default function Invites({
   }
 
   async function handleCreateInvite(login: string, fraction: string) {
-    const res = await fetch("http://localhost:3000/api/createInvite", {
+    const res = await fetch("/api/createInvite", {
       method: "POST",
       body: JSON.stringify({ login, fraction }),
     });
@@ -200,15 +199,14 @@ export default function Invites({
   );
 }
 
-export async function getServerSideProps(context: any) {
-  return requireAuth(context, async ({ session }: any) => {
-    let invites = await fetch("http://localhost:3000/api/showInvites", {
-      headers: {
-        cookie: context.req.headers.cookie,
-      },
-    }).then((res) => res.json());
-    return {
-      props: { authSession: session, invites },
-    };
-  });
+export async function getServerSideProps({ req, res }: any) {
+  let authSession = await getServerSession(req, res, authOptions);
+  let invites = await getData<Invite>(authSession, "showInvites");
+
+  return {
+    props: {
+      authSession,
+      invites,
+    },
+  };
 }

@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import post from "../../../utils/request.manager";
+import post from "../../../utils/request.adapter";
 
 export const authOptions = {
   providers: [

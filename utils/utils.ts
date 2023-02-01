@@ -1,25 +1,14 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { getToken } from "next-auth/jwt";
-import post from "./request.manager";
+import post from "./request.adapter";
 import { EffectCallback, useCallback, useEffect, useState } from "react";
+import { Session } from "next-auth";
 
 // TODO change this to a better name
-export async function getData<T>(
-  req: NextApiRequest,
-  res: NextApiResponse<T | any>,
+export function getData<T>(
+  session: Session,
   procedureName: string,
   ...args: string[]
 ) {
-  const token = await getToken({ req });
-  if (!token) {
-    res.status(401).json({ error: "Unauthorized" });
-    res.end();
-    return null;
-  }
-  const data = await post(procedureName, token.token, ...args);
-  if (data[0] && data[0].ERROR) res.status(400);
-  else res.status(200);
-  return data;
+  return post<T>(procedureName, session.user.token, ...args);
 }
 
 export type MapOrEntries<K, V> = Map<K, V> | [K, V][];

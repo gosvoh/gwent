@@ -1,8 +1,7 @@
-import { Session } from "next-auth";
-import { useEffect } from "react";
-import { useMap } from "../utils/utils";
-import { requireAuth } from "../utils/auth.utils";
+import { getServerSession, Session } from "next-auth";
+import { getData, useMap } from "../utils/utils";
 import styles from "../styles/Players.module.scss";
+import { authOptions } from "./api/auth/[...nextauth]";
 
 const fractions = [
   "Монстры",
@@ -23,7 +22,7 @@ export default function PlayersList({
   const [errorMessages, setErrorMessages] = useMap<string, string>();
 
   async function handleInvite(login: string) {
-    let res = await fetch("http://localhost:3000/api/createInvite", {
+    let res = await fetch("/api/createInvite", {
       method: "POST",
       body: JSON.stringify({
         login,
@@ -90,19 +89,14 @@ export default function PlayersList({
   );
 }
 
-export async function getServerSideProps(context: any) {
-  return requireAuth(context, async ({ session }: any) => {
-    let players = await fetch("http://localhost:3000/api/showPlayers", {
-      headers: {
-        cookie: context.req.headers.cookie,
-      },
-    }).then((res) => res.json());
+export async function getServerSideProps({ req, res }: any) {
+  let authSession = await getServerSession(req, res, authOptions);
+  let players = await getData(authSession, "showPlayers");
 
-    return {
-      props: {
-        authSession: session,
-        players,
-      },
-    };
-  });
+  return {
+    props: {
+      authSession,
+      players,
+    },
+  };
 }

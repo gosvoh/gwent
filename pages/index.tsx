@@ -1,9 +1,9 @@
 import styles from "../styles/Home.module.scss";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { Session, unstable_getServerSession } from "next-auth";
-import post from "../utils/request.manager";
+import { getServerSession, Session } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]";
+import { getData } from "../utils/utils";
 
 export default function Home({
   authSession: session,
@@ -49,15 +49,10 @@ function LoggedLayout({ session }: { session: Session }) {
   );
 }
 
-export async function getServerSideProps(context: any) {
-  let authSession = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  );
-
-  let checkToken = await post("checkToken", authSession?.user?.token as string);
-  if (!checkToken[0] || !checkToken[0].token) authSession = null;
+export async function getServerSideProps({ req, res }: any) {
+  let authSession = await getServerSession(req, res, authOptions);
+  let token = await getData<string>(authSession, "checkToken");
+  if (!token || !token[0] || !token[0].token) authSession = null;
 
   return {
     props: {

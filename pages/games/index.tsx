@@ -1,8 +1,9 @@
-import { requireAuth } from "../../utils/auth.utils";
 import styles from "../../styles/Games.module.scss";
 import { useRouter } from "next/router";
-import { Session } from "next-auth";
+import { getServerSession, Session } from "next-auth";
 import { useEffect, useState } from "react";
+import { getData } from "../../utils/utils";
+import { authOptions } from "../api/auth/[...nextauth]";
 
 export default function Games({
   authSession: session,
@@ -22,7 +23,7 @@ export default function Games({
   }, [isDirty, router]);
 
   async function handleDeleteGame(game_id: number) {
-    await fetch("http://localhost:3000/api/deleteGame", {
+    await fetch("/api/deleteGame", {
       method: "POST",
       body: JSON.stringify({ game_id }),
     });
@@ -70,15 +71,11 @@ export default function Games({
   );
 }
 
-export async function getServerSideProps(context: any) {
-  return requireAuth(context, async ({ session }: any) => {
-    let games = await fetch("http://localhost:3000/api/showGames", {
-      headers: {
-        cookie: context.req.headers.cookie,
-      },
-    }).then((res) => res.json());
-    return {
-      props: { authSession: session, games },
-    };
-  });
+export async function getServerSideProps({ req, res }: any) {
+  let authSession = await getServerSession(req, res, authOptions);
+  let games = await getData(authSession, "showGames");
+
+  return {
+    props: { authSession, games },
+  };
 }

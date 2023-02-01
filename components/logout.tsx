@@ -1,5 +1,5 @@
 import { signOut } from "next-auth/react";
-import post from "../utils/request.manager";
+import post from "../utils/request.adapter";
 import Link from "next/link";
 
 async function handler(token: string) {

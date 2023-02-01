@@ -1,10 +1,11 @@
 import { randomBytes } from "crypto";
-import { Session } from "next-auth";
+import { getServerSession, Session } from "next-auth";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import styles from "../../styles/Field.module.scss";
-import { requireAuth } from "../../utils/auth.utils";
+import { getData } from "../../utils/utils";
+import { authOptions } from "../api/auth/[...nextauth]";
 
 type Game = {
   id: number;
@@ -314,16 +315,13 @@ function GameField({ opponent, me, deck, cardsInRows }: GameFieldProps) {
     let test = deck.filter((c) => c.row === row && c.name === card.name);
     if (test.length === 0) return;
 
-    let res = await fetch(
-      `http://localhost:3000/api/addCardToRow?gameId=${router.query.id}`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          card: card.name,
-          row,
-        }),
-      }
-    );
+    let res = await fetch(`/api/addCardToRow?gameId=${router.query.id}`, {
+      method: "POST",
+      body: JSON.stringify({
+        card: card.name,
+        row,
+      }),
+    });
 
     card.selected = false;
     setSelectedCard(null);
@@ -432,15 +430,12 @@ function SelectCards({ availableCards, fraction }: SelectCardsProps) {
     if (specialCards.length > 10) return;
 
     // concat both arrays with comma and send to addCardsToDeck api
-    let req = await fetch(
-      `http://localhost:3000/api/addCardsToDeck?gameId=${router.query.id}`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          cards: [...squadCards, ...specialCards].map((card) => card.name),
-        }),
-      }
-    );
+    let req = await fetch(`/api/addCardsToDeck?gameId=${router.query.id}`, {
+      method: "POST",
+      body: JSON.stringify({
+        cards: [...squadCards, ...specialCards].map((card) => card.name),
+      }),
+    });
 
     if (req.status === 200) router.push(`/games/${router.query.id}`);
   }
@@ -478,83 +473,44 @@ function CardComponent({
   );
 }
 
-export async function getServerSideProps(context: any) {
-  return requireAuth(context, async ({ session }: any) => {
-    let playerInfo = await fetch(
-      `http://localhost:3000/api/getPlayerInfo?gameId=${context.params.id}`,
-      {
-        method: "GET",
-        headers: {
-          cookie: context.req.headers.cookie,
-        },
-      }
+export async function getServerSideProps({ req, res, ...context }: any) {
+  let authSession = await getServerSession(req, res, authOptions);
+  let playerInfo = await getData<Player>(
+    authSession,
+    "getPlayerInfo",
+    context.params.id
+  );
+  let deck = await getData<Card>(req, res, "showGameDeck", context.params.id);
+  let cardsInRows = await getData<Card>(
+    authSession,
+    "getCardsInRows",
+    context.params.id
+  );
+  let availableCards: Card[] = [];
+  if (deck.length == 0 && cardsInRows.length == 0) {
+    availableCards = await getData<Card>(
+      authSession,
+      "getAvailableCards",
+      context.params.id
     );
-    let playerInfoData: Player[] = await playerInfo.json();
-    // @ts-ignore
-    if (playerInfoData[0].ERROR)
-      return {
-        redirect: {
-          destination: "/",
-          permanent: false,
-        },
-      };
 
-    let deck = await fetch(
-      `http://localhost:3000/api/showGameDeck?gameId=${context.params.id}`,
-      {
-        method: "GET",
-        headers: {
-          cookie: context.req.headers.cookie,
-        },
-      }
-    );
-    let deckData: Card[] = await deck.json();
+    let squadCards = availableCards.filter((card) => card.type === "squad");
+    let specialCards = availableCards.filter((card) => card.type === "special");
+    specialCards = [...specialCards, ...specialCards].sort((a, b) => {
+      if (a.name < b.name) return -1;
+      if (a.name > b.name) return 1;
+      return 0;
+    });
+    availableCards = [...squadCards, ...specialCards];
+  }
 
-    let cardsInRows = await fetch(
-      `http://localhost:3000/api/getCardsInRows?gameId=${context.params.id}`,
-      {
-        method: "GET",
-        headers: {
-          cookie: context.req.headers.cookie,
-        },
-      }
-    );
-    let cardsInRowsData: Card[] = await cardsInRows.json();
-
-    let availableCardsData: Card[] = [];
-    if (deckData.length === 0 && cardsInRowsData.length === 0) {
-      let availableCards = await fetch(
-        `http://localhost:3000/api/getAvailableCards?gameId=${context.params.id}`,
-        {
-          method: "GET",
-          headers: {
-            cookie: context.req.headers.cookie,
-          },
-        }
-      );
-      availableCardsData = await availableCards.json();
-      let squadCards = availableCardsData.filter(
-        (card) => card.type === "squad"
-      );
-      let specialCards = availableCardsData.filter(
-        (card) => card.type === "special"
-      );
-      specialCards = [...specialCards, ...specialCards].sort((a, b) => {
-        if (a.name < b.name) return -1;
-        if (a.name > b.name) return 1;
-        return 0;
-      });
-      availableCardsData = [...squadCards, ...specialCards];
-    }
-
-    return {
-      props: {
-        authSession: session,
-        playerInfo: playerInfoData,
-        deck: deckData,
-        availableCards: availableCardsData,
-        cardsInRows: cardsInRowsData,
-      },
-    };
-  });
+  return {
+    props: {
+      authSession,
+      playerInfo,
+      deck,
+      availableCards,
+      cardsInRows,
+    },
+  };
 }
