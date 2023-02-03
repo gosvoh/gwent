@@ -8,7 +8,7 @@ export function getData<T>(
   procedureName: string,
   ...args: string[]
 ) {
-  return post<T>(procedureName, session.user.token, ...args);
+  return post<T>(procedureName, session?.user?.token, ...args);
 }
 
 export type MapOrEntries<K, V> = Map<K, V> | [K, V][];
