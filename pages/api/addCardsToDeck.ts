@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { getServerSession } from "next-auth";
 import { getData } from "../../utils/utils";
+import { authOptions } from "./auth/[...nextauth]";
 
 export default async function handler(
   req: NextApiRequest,
@@ -9,9 +11,9 @@ export default async function handler(
 
   const { cards } = JSON.parse(req.body);
   const { gameId } = req.query as { gameId: string };
+  const session = await getServerSession(req, res, authOptions);
   let result = await getData(
-    req,
-    res,
+    session,
     "addCardsToDeck",
     gameId,
     cards.join(",")

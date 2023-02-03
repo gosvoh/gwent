@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { getServerSession } from "next-auth";
 import { getData } from "../../utils/utils";
+import { authOptions } from "./auth/[...nextauth]";
 
 export default async function handler(
   req: NextApiRequest,
@@ -8,7 +10,8 @@ export default async function handler(
   if (req.method === "GET") return;
 
   const { inviter } = JSON.parse(req.body);
-  let result = await getData(req, res, "declineInvite", inviter);
+  const session = await getServerSession(req, res, authOptions);
+  let result = await getData(session, "declineInvite", inviter);
   if (!result) return;
   res.end();
 }
