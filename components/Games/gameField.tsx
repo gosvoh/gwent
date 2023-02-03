@@ -1,5 +1,5 @@
-import Player from "../../types/player";
-import Card from "../../types/card";
+import PlayerType from "../../types/player";
+import CardType from "../../types/card";
 import { useEffect, useRef, useState } from "react";
 import { randomBytes } from "crypto";
 import { useRouter } from "next/router";
@@ -8,10 +8,10 @@ import CardComponent from "./card";
 import Image from "next/image";
 
 interface GameFieldProps {
-  opponent: Player;
-  me: Player;
-  deck: Card[];
-  cardsInRows: Card[];
+  opponent: PlayerType;
+  me: PlayerType;
+  deck: CardType[];
+  cardsInRows: CardType[];
 }
 
 export default function GameField({
@@ -20,11 +20,11 @@ export default function GameField({
   deck,
   cardsInRows,
 }: GameFieldProps) {
-  const [normalizedDeck, setNormalizedDeck] = useState<Card[]>([]);
+  const [normalizedDeck, setNormalizedDeck] = useState<CardType[]>([]);
   const myOSRef = useRef<HTMLDivElement>(null);
   const myDBRef = useRef<HTMLDivElement>(null);
   const myRPRef = useRef<HTMLDivElement>(null);
-  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
+  const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -234,7 +234,7 @@ export default function GameField({
     return arr.filter((item, index) => arr.indexOf(item) != index);
   }
 
-  async function placeCard(card: Card | null, row: string) {
+  async function placeCard(card: CardType | null, row: string) {
     if (!card) return;
     let test = deck.filter((c) => c.row === row && c.name === card.name);
     if (test.length === 0) return;
@@ -260,7 +260,7 @@ export default function GameField({
     myRPRef.current?.classList.remove(styles.canBePlaced);
   }
 
-  function selectCard(card: Card): void {
+  function selectCard(card: CardType): void {
     if (!me.ready) return;
     if (selectedCard) {
       if (selectedCard.name === card.name) {

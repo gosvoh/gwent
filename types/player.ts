@@ -1,4 +1,4 @@
-type Player = {
+type PlayerType = {
   login: string;
   tokens: number;
   leader: string;
@@ -7,4 +7,4 @@ type Player = {
   skipped: boolean;
 };
 
-export default Player;
+export default PlayerType;

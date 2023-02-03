@@ -4,18 +4,17 @@ import { useEffect, useState } from "react";
 import styles from "../../styles/Field.module.scss";
 import { getData } from "../../utils/utils";
 import { authOptions } from "../api/auth/[...nextauth]";
-import Player from "../../types/player";
-import Card from "../../types/card";
-import Game from "../../types/game";
+import PlayerType from "../../types/player";
+import CardType from "../../types/card";
 import GameField from "../../components/Games/gameField";
 import CardComponent from "../../components/Games/card";
 
 interface GameProps {
   authSession: Session;
-  playerInfo: Player[];
-  deck: Card[];
-  availableCards: Card[];
-  cardsInRows: Card[];
+  playerInfo: PlayerType[];
+  deck: CardType[];
+  availableCards: CardType[];
+  cardsInRows: CardType[];
 }
 
 export default function Game({
@@ -25,11 +24,11 @@ export default function Game({
   availableCards,
   cardsInRows,
 }: GameProps) {
-  let opponent: Player =
+  let opponent: PlayerType =
     playerInfo[0].login === authSession.user.name
       ? playerInfo[1]
       : playerInfo[0];
-  let me: Player =
+  let me: PlayerType =
     playerInfo[0].login === authSession.user.name
       ? playerInfo[0]
       : playerInfo[1];
@@ -69,13 +68,13 @@ function Waiting() {
 }
 
 interface SelectCardsProps {
-  availableCards: Card[];
+  availableCards: CardType[];
   fraction: string;
 }
 
 function SelectCards({ availableCards, fraction }: SelectCardsProps) {
-  let [squadCards, setSquadCards] = useState<Card[]>([]);
-  let [specialCards, setSpecialCards] = useState<Card[]>([]);
+  let [squadCards, setSquadCards] = useState<CardType[]>([]);
+  let [specialCards, setSpecialCards] = useState<CardType[]>([]);
   let router = useRouter();
   let iterator = 0;
 
@@ -101,7 +100,7 @@ function SelectCards({ availableCards, fraction }: SelectCardsProps) {
     </>
   );
 
-  function selectCard(card: Card): void {
+  function selectCard(card: CardType): void {
     if (card.type === "special") {
       if (specialCards.length === 10) return;
 
@@ -142,20 +141,25 @@ function SelectCards({ availableCards, fraction }: SelectCardsProps) {
 
 export async function getServerSideProps({ req, res, ...context }: any) {
   let authSession = await getServerSession(req, res, authOptions);
-  let playerInfo = await getData<Player>(
+  let playerInfo = await getData<PlayerType>(
     authSession,
     "getPlayerInfo",
     context.params.id
   );
-  let deck = await getData<Card>(req, res, "showGameDeck", context.params.id);
-  let cardsInRows = await getData<Card>(
+  let deck = await getData<CardType>(
+    req,
+    res,
+    "showGameDeck",
+    context.params.id
+  );
+  let cardsInRows = await getData<CardType>(
     authSession,
     "getCardsInRows",
     context.params.id
   );
-  let availableCards: Card[] = [];
+  let availableCards: CardType[] = [];
   if (deck.length == 0 && cardsInRows.length == 0) {
-    availableCards = await getData<Card>(
+    availableCards = await getData<CardType>(
       authSession,
       "getAvailableCards",
       context.params.id

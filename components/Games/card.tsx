@@ -1,10 +1,10 @@
 import { CSSProperties } from "react";
-import Card from "../../types/card";
+import CardType from "../../types/card";
 import styles from "../../styles/Field.module.scss";
 import Image from "next/image";
 
 interface CardComponentInterface {
-  card: Card;
+  card: CardType;
   fraction: string;
   onClick?: () => void;
   className?: string;

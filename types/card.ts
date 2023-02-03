@@ -1,4 +1,4 @@
-type Card = {
+type CardType = {
   name: string;
   type?: "squad" | "special";
   selected?: boolean;
@@ -6,4 +6,4 @@ type Card = {
   player?: string;
 };
 
-export default Card;
+export default CardType;

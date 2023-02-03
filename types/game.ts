@@ -1,7 +1,7 @@
-type Game = {
+type GameType = {
   id: number;
   opponent: string;
   turn: string;
 };
 
-export default Game;
+export default GameType;
