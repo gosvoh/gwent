@@ -63,7 +63,7 @@ function Waiting() {
   useEffect(() => {
     const interval = setInterval(() => router.replace(router.asPath), 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [router]);
   return <p>Waiting for opponent</p>;
 }
 

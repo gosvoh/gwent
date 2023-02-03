@@ -34,7 +34,7 @@ export default function GameField({
   useEffect(() => {
     const interval = setInterval(() => router.replace(router.asPath), 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (deck.length === 0) return;

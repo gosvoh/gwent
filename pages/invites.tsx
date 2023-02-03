@@ -51,7 +51,7 @@ export default function Invites({
       router.replace(router.asPath);
       setIsDirty(false);
     }
-  }, [isDirty, router]);
+  }, [isDirty, router, setInviteFractions]);
 
   useEffect(() => {
     if (errorMessage) setTimeout(() => setErrorMessage(""), 5000);
