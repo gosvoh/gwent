@@ -1,7 +1,8 @@
 import { FormEvent, useState } from "react";
 import styles from "../../styles/auth/Register.module.scss";
 import { signIn } from "next-auth/react";
-import { requireNonAuth } from "../../utils/auth.utils";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../api/auth/[...nextauth]";
 
 export default function Register({ context }: any) {
   const [response, setResponse] = useState("");
@@ -39,10 +40,9 @@ export default function Register({ context }: any) {
   );
 }
 
-export async function getServerSideProps(context: any) {
-  let red = await requireNonAuth(context);
-  if (red) return { redirect: red.redirect, props: {} };
-  return {
-    props: {},
-  };
+export async function getServerSideProps({ req, res, ...context }: any) {
+  let session = await getServerSession(req, res, authOptions);
+  if (session)
+    return { redirect: { destination: "/", permanent: false }, props: {} };
+  return { props: {} };
 }
