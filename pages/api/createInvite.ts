@@ -13,6 +13,8 @@ export default async function handler(
   const session = await getServerSession(req, res, authOptions);
   let result = await getData(session, "createInvite", login, fraction);
   if (!result) return;
-  res.json(result);
+  if (result.some((obj) => Object.keys(obj).includes("ERROR")))
+    return res.status(400).json(result);
+  else res.json(result);
   res.end();
 }

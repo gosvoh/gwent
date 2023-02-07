@@ -1,7 +1,7 @@
-async function post<T>(
+async function post<T = any>(
   procedureName: string,
   ...args: string[]
-): Promise<Array<any>> {
+): Promise<Array<T>> {
   let params = new URLSearchParams();
   params.append("db", "265086");
   params.append("pname", procedureName);
@@ -14,11 +14,22 @@ async function post<T>(
     return new Promise((resolve, reject) =>
       reject("Error: " + response.statusText)
     );
-  const data = await response.json();
-  if (data.Error) return new Promise((resolve, reject) => reject(data.Error));
-  if (data.ERROR) return new Promise((resolve, reject) => reject(data.ERROR));
-  if (!data.RESULTS) return new Promise((resolve, reject) => reject("No data"));
-  return data.RESULTS[0];
+  try {
+    const data = await response.json();
+    console.log("post", procedureName, data);
+    if (data.Error) return new Promise((resolve, reject) => reject(data.Error));
+    if (data.ERROR) return new Promise((resolve, reject) => reject(data.ERROR));
+    if (!data.RESULTS)
+      return new Promise((resolve, reject) => reject("No data"));
+    let results: any[] = data.RESULTS;
+    if (results.includes("ERROR"))
+      return new Promise((resolve, reject) =>
+        reject(results.find((r) => r === "ERROR"))
+      );
+    return results[0];
+  } catch (error) {
+    return new Promise((resolve, reject) => reject(error));
+  }
 }
 
 export default post;

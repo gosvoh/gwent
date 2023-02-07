@@ -8,6 +8,7 @@ import PlayerType from "../../types/player";
 import CardType from "../../types/card";
 import GameField from "../../components/Games/gameField";
 import CardComponent from "../../components/Games/card";
+import AlertContainer from "../../components/alert.container";
 
 interface GameProps {
   authSession: Session;
@@ -24,6 +25,9 @@ export default function Game({
   availableCards,
   cardsInRows,
 }: GameProps) {
+  let check: any = playerInfo[0];
+  if (check.ERROR) return <AlertContainer alertMessage={check.ERROR} />;
+
   let opponent: PlayerType =
     playerInfo[0].login === authSession.user.name
       ? playerInfo[1]
@@ -146,17 +150,19 @@ export async function getServerSideProps({ req, res, ...context }: any) {
     "getPlayerInfo",
     context.params.id
   );
+
   let deck = await getData<CardType>(
-    req,
-    res,
+    authSession,
     "showGameDeck",
     context.params.id
   );
+
   let cardsInRows = await getData<CardType>(
     authSession,
     "getCardsInRows",
     context.params.id
   );
+
   let availableCards: CardType[] = [];
   if (deck.length == 0 && cardsInRows.length == 0) {
     availableCards = await getData<CardType>(
@@ -167,11 +173,9 @@ export async function getServerSideProps({ req, res, ...context }: any) {
 
     let squadCards = availableCards.filter((card) => card.type === "squad");
     let specialCards = availableCards.filter((card) => card.type === "special");
-    specialCards = [...specialCards, ...specialCards].sort((a, b) => {
-      if (a.name < b.name) return -1;
-      if (a.name > b.name) return 1;
-      return 0;
-    });
+    specialCards = [...specialCards, ...specialCards].sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
     availableCards = [...squadCards, ...specialCards];
   }
 

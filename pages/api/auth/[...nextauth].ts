@@ -33,13 +33,14 @@ export const authOptions = {
     maxAge: 30 * 60,
   },
   callbacks: {
-    session({ session, token }: any) {
+    async session({ session, token }: any) {
       session.user.token = token.token;
       session.user.email = null;
       session.user.image = null;
+      let ret = await post("updateToken", token.token);
       return session;
     },
-    jwt({ token, user }: any) {
+    async jwt({ token, user }: any) {
       if (user) token.token = user.token;
       return { ...token, ...user };
     },

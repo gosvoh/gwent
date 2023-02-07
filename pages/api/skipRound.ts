@@ -8,11 +8,10 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "GET") return;
-
+  // TODO Разобраться почему отбирается управление у противника
   const game_id = req.query.game_id as string;
   const session = await getServerSession(req, res, authOptions);
   let result = await getData(session, "skipRound", game_id);
-  console.log("skipRound.ts result: ", result);
   if (!result) return;
   res.end();
 }

@@ -28,10 +28,6 @@ export default function GameField({
   const router = useRouter();
 
   useEffect(() => {
-    console.log("me, opponent", me, opponent);
-  }, [me, opponent]);
-
-  useEffect(() => {
     const interval = setInterval(() => router.replace(router.asPath), 10000);
     return () => clearInterval(interval);
   }, [router]);
@@ -46,7 +42,6 @@ export default function GameField({
       newDeck.splice(index, 1);
     }
     setNormalizedDeck(newDeck);
-    console.log("deck, newDeck", deck, newDeck);
   }, [deck]);
 
   function handleSkipRound() {
@@ -115,7 +110,6 @@ export default function GameField({
             <div className={styles.actions}>
               <button>Show deck</button>
               <button>Show beat</button>
-              <button disabled={opponent.ready}>End turn</button>
               <button onClick={handleSkipRound} disabled={me.skipped}>
                 End round
               </button>

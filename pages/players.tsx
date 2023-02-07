@@ -2,6 +2,10 @@ import { getServerSession, Session } from "next-auth";
 import { getData, useMap } from "../utils/utils";
 import styles from "../styles/Players.module.scss";
 import { authOptions } from "./api/auth/[...nextauth]";
+import InviteType from "../types/invite";
+import PlayerType from "../types/player";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 const fractions = [
   "Монстры",
@@ -14,12 +18,15 @@ const fractions = [
 export default function PlayersList({
   authSession: session,
   players,
+  invites,
 }: {
   authSession: Session;
-  players: any[];
+  players: PlayerType[];
+  invites: InviteType[];
 }) {
   const [inviteFractions, setInviteFractions] = useMap<string, string>();
   const [errorMessages, setErrorMessages] = useMap<string, string>();
+  const router = useRouter();
 
   async function handleInvite(login: string) {
     let res = await fetch("/api/createInvite", {
@@ -31,7 +38,7 @@ export default function PlayersList({
     });
     let data = await res.json();
     if (res.status !== 200) setErrorMessages.set(login, data[0].ERROR);
-    else setErrorMessages.set(login, "Done");
+    else router.replace(router.asPath);
     setTimeout(() => setErrorMessages.remove(login), 5000);
   }
 
@@ -47,42 +54,61 @@ export default function PlayersList({
           </tr>
         </thead>
         <tbody>
-          {players.length === 0 && (
+          {players.length === 1 && (
             <tr>
-              <td colSpan={3}>No players</td>
+              <td colSpan={3}>No players except you</td>
             </tr>
           )}
-          {players.map((player) => (
-            <tr key={player.login}>
-              <td>{player.login}</td>
-              <td>
-                {player.login !== session.user.name && (
-                  <select
-                    value={inviteFractions.get(player.login)}
-                    onChange={(e) =>
-                      setInviteFractions.set(player.login, e.target.value)
-                    }
-                  >
-                    {fractions.map((fraction) => (
-                      <option key={fraction} value={fraction}>
-                        {fraction}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </td>
-              <td>
-                {player.login !== session.user.name && (
-                  <button onClick={() => handleInvite(player.login)}>
-                    Invite
-                  </button>
-                )}
-                {errorMessages.get(player.login) && (
-                  <div>{errorMessages.get(player.login)}</div>
-                )}
-              </td>
-            </tr>
-          ))}
+          {players.map((player) => {
+            if (player.login === session.user.name) return null;
+            return (
+              <tr key={player.login}>
+                <td>{player.login}</td>
+                <td>
+                  {player.login !== session.user.name &&
+                    !invites.some(
+                      (invite) =>
+                        invite.inviter === player.login ||
+                        invite.invited === player.login
+                    ) && (
+                      <select
+                        value={inviteFractions.get(player.login)}
+                        onChange={(e) =>
+                          setInviteFractions.set(player.login, e.target.value)
+                        }
+                      >
+                        {fractions.map((fraction) => (
+                          <option key={fraction} value={fraction}>
+                            {fraction}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                </td>
+                <td className={styles.action}>
+                  {invites.some((invite) => {
+                    return (
+                      invite.inviter === player.login ||
+                      invite.invited === player.login
+                    );
+                  }) ? (
+                    <Link href="/invites">Go to invites</Link>
+                  ) : (
+                    <>
+                      {player.login !== session.user.name && (
+                        <button onClick={() => handleInvite(player.login)}>
+                          Invite
+                        </button>
+                      )}
+                      {errorMessages.get(player.login) && (
+                        <div>{errorMessages.get(player.login)}</div>
+                      )}
+                    </>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -91,12 +117,14 @@ export default function PlayersList({
 
 export async function getServerSideProps({ req, res }: any) {
   let authSession = await getServerSession(req, res, authOptions);
-  let players = await getData(authSession, "showPlayers");
+  let players = await getData<PlayerType>(authSession, "showPlayers");
+  let invites = await getData<InviteType>(authSession, "showInvites");
 
   return {
     props: {
       authSession,
       players,
+      invites,
     },
   };
 }

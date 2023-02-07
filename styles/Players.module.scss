@@ -1,17 +1,37 @@
 .list {
   border-collapse: collapse;
-  border: 1px solid black;
   width: 100%;
   table-layout: fixed;
 
   th,
   td {
-    border: 1px solid black;
     padding: 0.5rem 1rem;
     text-align: center;
+
+    a:hover {
+      text-decoration: underline;
+    }
+  }
+
+  th:not(:last-child),
+  td:not(:last-child) {
+    border-right: 1px solid currentColor;
+  }
+
+  thead tr,
+  tr:not(:last-child) {
+    border-bottom: 1px solid currentColor;
   }
 
   h2 {
     margin: 0;
   }
+}
+
+.action {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 1rem;
+  line-height: 0.99rem; // фикс для небольшого изменения высоты строки после вывода сообщения
 }

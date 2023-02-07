@@ -51,7 +51,7 @@ function LoggedLayout({ session }: { session: Session }) {
 
 export async function getServerSideProps({ req, res }: any) {
   let authSession = await getServerSession(req, res, authOptions);
-  let token = await getData<string>(authSession, "checkToken");
+  let token = await getData<string | any>(authSession, "checkToken");
   if (!token || !token[0] || !token[0].token) authSession = null;
 
   return {

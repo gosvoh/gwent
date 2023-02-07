@@ -21,7 +21,6 @@ function DefaultLayout() {
       <Link href={""} onClick={() => signIn()}>
         Sign in
       </Link>
-      <Link href={"/auth/register"}>Register</Link>
     </>
   );
 }

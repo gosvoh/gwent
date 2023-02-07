@@ -13,7 +13,6 @@ export default async function handler(
   const { gameId } = req.query as { gameId: string };
   const session = await getServerSession(req, res, authOptions);
   let result = await getData(session, "addCardToRow", gameId, card, row);
-  console.log("addCardToRow.ts result: ", result);
   if (!result) return;
   res.json(result);
   res.end();

@@ -3,7 +3,7 @@ import { EffectCallback, useCallback, useEffect, useState } from "react";
 import { Session } from "next-auth";
 
 // TODO change this to a better name
-export function getData<T>(
+export function getData<T = any>(
   session: Session,
   procedureName: string,
   ...args: string[]

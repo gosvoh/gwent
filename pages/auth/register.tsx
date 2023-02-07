@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import styles from "../../styles/auth/Register.module.scss";
 import { signIn } from "next-auth/react";
 import { getServerSession } from "next-auth";
@@ -6,6 +6,9 @@ import { authOptions } from "../api/auth/[...nextauth]";
 
 export default function Register({ context }: any) {
   const [response, setResponse] = useState("");
+  useEffect(() => {
+    if (response) setTimeout(() => setResponse(""), 5000);
+  }, [response]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -24,19 +27,21 @@ export default function Register({ context }: any) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.form}>
-      <h1 className={styles.header}>Register</h1>
-      {response === "" ? <></> : <p className={styles.error}>{response}</p>}
-      <label htmlFor="login">
-        Login
-        <input id="login" name="login" type="text" />
-      </label>
-      <label htmlFor="password">
-        Password
-        <input id="password" name="password" type="password" />
-      </label>
-      <button type="submit">Register</button>
-    </form>
+    <div className={styles.wrapper}>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <h1 className={styles.header}>Register</h1>
+        <p className={styles.error}>{response === "" ? <br /> : response}</p>
+        <label htmlFor="login">
+          Login
+          <input id="login" name="login" type="text" />
+        </label>
+        <label htmlFor="password">
+          Password
+          <input id="password" name="password" type="password" />
+        </label>
+        <button type="submit">Register</button>
+      </form>
+    </div>
   );
 }
 

@@ -4,14 +4,8 @@ import { useEffect, useState } from "react";
 import { getData, useMap } from "../utils/utils";
 import styles from "../styles/Invites.module.scss";
 import { authOptions } from "./api/auth/[...nextauth]";
-
-type Invite = {
-  ERROR?: string;
-  inviter: string;
-  invited: string;
-  dt: Date;
-  inviter_fraction: string;
-};
+import InviteType from "../types/invite";
+import Link from "next/link";
 
 const fractions = [
   "Монстры",
@@ -26,7 +20,7 @@ export default function Invites({
   invites,
 }: {
   authSession: Session;
-  invites: Invite[];
+  invites: InviteType[];
 }) {
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState("");
@@ -105,16 +99,18 @@ export default function Invites({
             <th>Opponent</th>
             <th>Timestamp</th>
             <th>Action</th>
-            <th>Choose your fraction</th>
+            <th>Your fraction</th>
           </tr>
         </thead>
         <tbody>
           {invites.length === 0 && (
             <tr>
-              <td colSpan={4}>No invites</td>
+              <td colSpan={4}>
+                No invites. <Link href="/players">Show players</Link>
+              </td>
             </tr>
           )}
-          {invites.map((invite: Invite) => {
+          {invites.map((invite: InviteType) => {
             let key = invite.dt.toString();
 
             return (
@@ -174,7 +170,7 @@ export default function Invites({
 
       <div className={styles.inviteInput}>
         <label htmlFor="invite">
-          Invite
+          Invite:
           <input
             type="text"
             id="invite"
@@ -182,7 +178,7 @@ export default function Invites({
           />
         </label>
         <label htmlFor="fraction">
-          Fraction
+          Fraction:
           <select id="fraction" onChange={(e) => setFraction(e.target.value)}>
             {fractions.map((fraction) => (
               <option key={fraction}>{fraction}</option>
@@ -201,7 +197,7 @@ export default function Invites({
 
 export async function getServerSideProps({ req, res }: any) {
   let authSession = await getServerSession(req, res, authOptions);
-  let invites = await getData<Invite>(authSession, "showInvites");
+  let invites = await getData<InviteType>(authSession, "showInvites");
 
   return {
     props: {

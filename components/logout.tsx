@@ -4,7 +4,7 @@ import Link from "next/link";
 
 async function handler(token: string) {
   await post("logout", token);
-  await signOut();
+  await signOut({ callbackUrl: "/" });
 }
 
 export default function Logout({ token }: { token: string }) {

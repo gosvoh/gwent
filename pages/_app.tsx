@@ -8,7 +8,7 @@ export default function App({
   pageProps: { session, ...pageProps },
 }: AppProps) {
   return (
-    <SessionProvider session={pageProps.session}>
+    <SessionProvider session={session} refetchWhenOffline={false}>
       <RootLayout>
         <Component {...pageProps} />
       </RootLayout>
