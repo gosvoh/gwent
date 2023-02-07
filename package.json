@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "set NODE_OPTIONS='--inspect' && next dev",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -27,6 +27,8 @@
     "eslint-plugin-react": "^7.31.10",
     "eslint-plugin-react-hooks": "^4.6.0",
     "prettier": "^2.7.1",
+    "pino": "^8.9.0",
+    "pino-pretty": "^9.1.1",
     "sass": "^1.56.0"
   }
 }

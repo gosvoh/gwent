@@ -1,3 +1,6 @@
+import {} from "pino";
+import { logger } from "./utils";
+
 async function post<T = any>(
   procedureName: string,
   ...args: string[]
@@ -16,7 +19,7 @@ async function post<T = any>(
     );
   try {
     const data = await response.json();
-    console.log("post", procedureName, data);
+    logger.debug({ name: "post", procedureName, data });
     if (data.Error) return new Promise((resolve, reject) => reject(data.Error));
     if (data.ERROR) return new Promise((resolve, reject) => reject(data.ERROR));
     if (!data.RESULTS)

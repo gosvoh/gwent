@@ -1,6 +1,7 @@
 import post from "./request.adapter";
 import { EffectCallback, useCallback, useEffect, useState } from "react";
 import { Session } from "next-auth";
+import pino from "pino";
 
 // TODO change this to a better name
 export function getData<T = any>(
@@ -65,3 +66,18 @@ export function useEffectOnce(effect: EffectCallback) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(effect, []);
 }
+
+export const logger = pino({
+  level: "debug",
+  transport: {
+    target: "pino-pretty",
+    options: {
+      colorize: true,
+      singleLine: true,
+    },
+  },
+  destination: {
+    sybc: true,
+  },
+  base: undefined,
+});
