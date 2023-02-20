@@ -1,18 +1,26 @@
 .inviteList {
   border-collapse: collapse;
-  border: 1px solid currentColor;
   width: 100%;
   table-layout: fixed;
 
   th,
   td {
-    border: 1px solid currentColor;
     padding: 0.5rem 1rem;
     text-align: center;
 
     a:hover {
       text-decoration: underline;
     }
+  }
+
+  th:not(:last-child),
+  td:not(:last-child) {
+    border-right: 1px solid currentColor;
+  }
+
+  thead tr,
+  tr:not(:last-child) {
+    border-bottom: 1px solid currentColor;
   }
 
   h2 {

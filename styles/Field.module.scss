@@ -170,6 +170,14 @@
   min-height: 100%;
   overflow-y: scroll;
 
+  p {
+    margin: 0;
+    text-align: center;
+    border-bottom: 1px solid currentColor;
+    width: fit-content;
+    margin-inline: auto;
+  }
+
   > div:not(:last-child) {
     margin-bottom: 1rem;
   }

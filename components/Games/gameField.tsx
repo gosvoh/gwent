@@ -210,6 +210,7 @@ export default function GameField({
         </div>
       </div>
       <div className={styles.deckGrid}>
+        <p>Your deck</p>
         {normalizedDeck.map((card) => {
           return (
             <CardComponent
@@ -245,7 +246,7 @@ export default function GameField({
     setSelectedCard(null);
     clearRefs();
 
-    await router.replace(router.asPath);
+    router.replace(router.asPath);
   }
 
   function clearRefs() {

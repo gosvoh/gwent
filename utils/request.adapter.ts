@@ -19,7 +19,7 @@ async function post<T = any>(
     );
   try {
     const data = await response.json();
-    logger.debug({ name: "post", procedureName, data });
+    logger.debug({ name: `${post.name} ${procedureName}`, data });
     if (data.Error) return new Promise((resolve, reject) => reject(data.Error));
     if (data.ERROR) return new Promise((resolve, reject) => reject(data.ERROR));
     if (!data.RESULTS)
