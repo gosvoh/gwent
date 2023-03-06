@@ -68,7 +68,7 @@ export function useEffectOnce(effect: EffectCallback) {
 }
 
 export const logger = pino({
-  level: "debug",
+  level: process.env.LOGGING_LEVEL,
   transport: {
     target: "pino-pretty",
     options: {
@@ -77,7 +77,7 @@ export const logger = pino({
     },
   },
   destination: {
-    sybc: true,
+    sync: true,
   },
   base: undefined,
 });
