@@ -1,4 +1,3 @@
-import {} from "pino";
 import { logger } from "./utils";
 
 async function post<T = any>(
