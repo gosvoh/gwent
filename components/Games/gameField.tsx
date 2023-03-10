@@ -1,7 +1,6 @@
 import PlayerType from "../../types/player";
 import CardType from "../../types/card";
-import { useEffect, useRef, useState } from "react";
-import { randomBytes } from "crypto";
+import { Dispatch, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import styles from "../../styles/Field.module.scss";
 import CardComponent from "./card";
@@ -12,6 +11,8 @@ interface GameFieldProps {
   me: PlayerType;
   deck: CardType[];
   cardsInRows: CardType[];
+  beat: CardType[];
+  // medic: boolean;
 }
 
 export default function GameField({
@@ -19,12 +20,15 @@ export default function GameField({
   me,
   deck,
   cardsInRows,
-}: GameFieldProps) {
+  beat,
+}: // medic,
+GameFieldProps) {
   const [normalizedDeck, setNormalizedDeck] = useState<CardType[]>([]);
+  const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
+  const [showBeat, setShowBeat] = useState<boolean>(false);
   const myOSRef = useRef<HTMLDivElement>(null);
   const myDBRef = useRef<HTMLDivElement>(null);
   const myRPRef = useRef<HTMLDivElement>(null);
-  const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -44,11 +48,82 @@ export default function GameField({
     setNormalizedDeck(newDeck);
   }, [deck]);
 
-  function handleSkipRound() {
-    fetch(`/api/skipRound?game_id=${router.query.id}`, {
+  // useEffect(() => {
+  //   if (!medic) return;
+  //   if (showBeat) return;
+
+  //   fetch(`/api/clearMedic?game_id=${router.query.id}`, {
+  //     method: "POST",
+  //   }).then(() => router.replace(router.asPath));
+  // }, [showBeat, medic]);
+
+  async function handleSkipRound() {
+    await fetch(`/api/skipRound?game_id=${router.query.id}`, {
       method: "POST",
     });
     router.replace(router.asPath);
+  }
+
+  function findDuplicates(arr: any[]) {
+    return arr.filter((item, index) => arr.indexOf(item) != index);
+  }
+
+  async function placeCard(card: CardType | null, row: string) {
+    if (!card) return;
+    let test = deck.filter((c) => c.row === row && c.name === card.name);
+    if (test.length === 0) return;
+
+    let res = await fetch(`/api/addCardToRow?gameId=${router.query.id}`, {
+      method: "POST",
+      body: JSON.stringify({
+        card: card.id,
+        row,
+      }),
+    });
+
+    card.selected = false;
+    setSelectedCard(null);
+    clearRefs();
+
+    router.replace(router.asPath);
+  }
+
+  function clearRefs() {
+    myDBRef.current?.classList.remove(styles.canBePlaced);
+    myOSRef.current?.classList.remove(styles.canBePlaced);
+    myRPRef.current?.classList.remove(styles.canBePlaced);
+  }
+
+  function selectCard(card: CardType): void {
+    if (!me.ready) return;
+    if (selectedCard) {
+      if (selectedCard.name === card.name) {
+        selectedCard.selected = false;
+        setSelectedCard(null);
+        clearRefs();
+        return;
+      }
+    }
+    selectedCard?.selected && (selectedCard.selected = false);
+    setSelectedCard(card);
+    card.selected = true;
+
+    clearRefs();
+
+    let selectedCards = deck.filter((c) => c.name === card.name);
+    selectedCards.forEach((c) => {
+      if (c.row === "Дальнобойный")
+        myDBRef.current?.classList.add(styles.canBePlaced);
+      if (c.row === "Осадный")
+        myOSRef.current?.classList.add(styles.canBePlaced);
+      if (c.row === "Рукопашный")
+        myRPRef.current?.classList.add(styles.canBePlaced);
+      if (c.row === null) {
+        myRPRef.current?.classList.add(styles.canBePlaced);
+        myOSRef.current?.classList.add(styles.canBePlaced);
+        myDBRef.current?.classList.add(styles.canBePlaced);
+      }
+    });
   }
 
   return (
@@ -109,7 +184,9 @@ export default function GameField({
             </div>
             <div className={styles.actions}>
               <button>Show deck</button>
-              <button>Show beat</button>
+              <button onClick={() => setShowBeat(!showBeat)}>
+                {showBeat ? "Close" : "Show"} beat
+              </button>
               <button onClick={handleSkipRound} disabled={me.skipped}>
                 End round
               </button>
@@ -127,7 +204,7 @@ export default function GameField({
                   card={card}
                   fraction={opponent.fraction}
                   className={styles.card}
-                  key={randomBytes(16).toString("hex")}
+                  key={card.id}
                 />
               );
           })}
@@ -141,7 +218,7 @@ export default function GameField({
                   card={card}
                   fraction={opponent.fraction}
                   className={styles.card}
-                  key={randomBytes(16).toString("hex")}
+                  key={card.id}
                 />
               );
           })}
@@ -155,7 +232,7 @@ export default function GameField({
                   card={card}
                   fraction={opponent.fraction}
                   className={styles.card}
-                  key={randomBytes(16).toString("hex")}
+                  key={card.id}
                 />
               );
           })}
@@ -172,7 +249,7 @@ export default function GameField({
                   card={card}
                   fraction={me.fraction}
                   className={styles.card}
-                  key={randomBytes(16).toString("hex")}
+                  key={card.id}
                 />
               );
           })}
@@ -189,7 +266,7 @@ export default function GameField({
                   card={card}
                   fraction={me.fraction}
                   className={styles.card}
-                  key={randomBytes(16).toString("hex")}
+                  key={card.id}
                 />
               );
           })}
@@ -203,87 +280,75 @@ export default function GameField({
                   card={card}
                   fraction={me.fraction}
                   className={styles.card}
-                  key={randomBytes(16).toString("hex")}
+                  key={card.id}
                 />
               );
           })}
         </div>
       </div>
       <div className={styles.deckGrid}>
-        <p>Your deck</p>
-        {normalizedDeck.map((card) => {
-          return (
-            <CardComponent
-              card={card}
-              key={randomBytes(16).toString("hex")}
-              fraction={me.fraction}
-              onClick={() => selectCard(card)}
-            />
-          );
-        })}
+        {showBeat ? (
+          <Beat beat={beat} player={me} selectCard={selectCard} />
+        ) : (
+          <GameDeck
+            deck={deck}
+            fraction={me.fraction}
+            selectCard={selectCard}
+          />
+        )}
       </div>
     </div>
   );
+}
 
-  function findDuplicates(arr: any[]) {
-    return arr.filter((item, index) => arr.indexOf(item) != index);
-  }
+function GameDeck({
+  deck,
+  fraction,
+  selectCard,
+}: {
+  deck: CardType[];
+  fraction: string;
+  selectCard: Dispatch<any>;
+}) {
+  return (
+    <>
+      <p>Your deck</p>
+      {deck.map((card) => {
+        return (
+          <CardComponent
+            card={card}
+            key={card.id}
+            fraction={fraction}
+            onClick={() => selectCard(card)}
+          />
+        );
+      })}
+    </>
+  );
+}
 
-  async function placeCard(card: CardType | null, row: string) {
-    if (!card) return;
-    let test = deck.filter((c) => c.row === row && c.name === card.name);
-    if (test.length === 0) return;
-
-    let res = await fetch(`/api/addCardToRow?gameId=${router.query.id}`, {
-      method: "POST",
-      body: JSON.stringify({
-        card: card.name,
-        row,
-      }),
-    });
-
-    card.selected = false;
-    setSelectedCard(null);
-    clearRefs();
-
-    router.replace(router.asPath);
-  }
-
-  function clearRefs() {
-    myDBRef.current?.classList.remove(styles.canBePlaced);
-    myOSRef.current?.classList.remove(styles.canBePlaced);
-    myRPRef.current?.classList.remove(styles.canBePlaced);
-  }
-
-  function selectCard(card: CardType): void {
-    if (!me.ready) return;
-    if (selectedCard) {
-      if (selectedCard.name === card.name) {
-        selectedCard.selected = false;
-        setSelectedCard(null);
-        clearRefs();
-        return;
-      }
-    }
-    selectedCard?.selected && (selectedCard.selected = false);
-    setSelectedCard(card);
-    card.selected = true;
-
-    clearRefs();
-
-    let selectedCards = deck.filter((c) => c.name === card.name);
-    selectedCards.forEach((c) => {
-      if (c.row === "Дальнобойный")
-        myDBRef.current?.classList.add(styles.canBePlaced);
-      if (c.row === "Осадный")
-        myOSRef.current?.classList.add(styles.canBePlaced);
-      if (c.row === "Рукопашный")
-        myRPRef.current?.classList.add(styles.canBePlaced);
-      if (c.row === null) {
-        myRPRef.current?.classList.add(styles.canBePlaced);
-        myOSRef.current?.classList.add(styles.canBePlaced);
-        myDBRef.current?.classList.add(styles.canBePlaced);
-      }
-    });
-  }
+function Beat({
+  beat,
+  player,
+  selectCard,
+}: {
+  beat: CardType[];
+  player: PlayerType;
+  selectCard: Dispatch<any>;
+}) {
+  return (
+    <>
+      <p>Your beat</p>
+      {beat.map((card) => {
+        return (
+          <CardComponent
+            card={card}
+            key={card.id}
+            fraction={player.fraction}
+            onClick={() => selectCard(card)}
+          />
+        );
+      })}
+    </>
+  );
 }

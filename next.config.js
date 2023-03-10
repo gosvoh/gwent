@@ -6,7 +6,7 @@ const nextConfig = {
   sassOptions: {
     includePaths: [path.join(__dirname, "styles")],
   },
-  output: 'standalone',
+  output: "standalone",
 };
 
 module.exports = nextConfig;

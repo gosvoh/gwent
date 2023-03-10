@@ -2,7 +2,7 @@ import { getServerSession, Session } from "next-auth";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import styles from "../../styles/Field.module.scss";
-import { getData } from "../../utils/utils";
+import { getData, logger } from "../../utils/utils";
 import { authOptions } from "../api/auth/[...nextauth]";
 import PlayerType from "../../types/player";
 import CardType from "../../types/card";
@@ -16,6 +16,8 @@ interface GameProps {
   deck: CardType[];
   availableCards: CardType[];
   cardsInRows: CardType[];
+  beat: CardType[];
+  medic: boolean;
 }
 
 export default function Game({
@@ -24,6 +26,8 @@ export default function Game({
   deck,
   availableCards,
   cardsInRows,
+  beat,
+  medic,
 }: GameProps) {
   let check: any = playerInfo[0];
   if (check.ERROR) return <AlertContainer alertMessage={check.ERROR} />;
@@ -53,6 +57,8 @@ export default function Game({
         opponent={opponent}
         deck={deck}
         cardsInRows={cardsInRows}
+        beat={beat}
+        // medic={medic}
       />
     );
 }
@@ -81,28 +87,6 @@ function SelectCards({ availableCards, fraction }: SelectCardsProps) {
   let [specialCards, setSpecialCards] = useState<CardType[]>([]);
   let router = useRouter();
   let iterator = 0;
-
-  return (
-    <>
-      <div className={styles.cardsGrid}>
-        {availableCards.map((card) => (
-          <CardComponent
-            card={card}
-            fraction={fraction}
-            onClick={() => selectCard(card)}
-            key={card.name + iterator++}
-          />
-        ))}
-      </div>
-      <button
-        disabled={specialCards.length > 10 || squadCards.length < 22}
-        onClick={sendCards}
-        className={styles.btn}
-      >
-        Send cards
-      </button>
-    </>
-  );
 
   function selectCard(card: CardType): void {
     if (card.type === "special") {
@@ -141,6 +125,28 @@ function SelectCards({ availableCards, fraction }: SelectCardsProps) {
 
     if (req.status === 200) router.push(`/games/${router.query.id}`);
   }
+
+  return (
+    <>
+      <div className={styles.cardsGrid}>
+        {availableCards.map((card) => (
+          <CardComponent
+            card={card}
+            fraction={fraction}
+            onClick={() => selectCard(card)}
+            key={card.name + iterator++}
+          />
+        ))}
+      </div>
+      <button
+        disabled={specialCards.length > 10 || squadCards.length < 22}
+        onClick={sendCards}
+        className={styles.btn}
+      >
+        Send cards
+      </button>
+    </>
+  );
 }
 
 export async function getServerSideProps({ req, res, ...context }: any) {
@@ -179,6 +185,17 @@ export async function getServerSideProps({ req, res, ...context }: any) {
     availableCards = [...squadCards, ...specialCards];
   }
 
+  let beat = await getData<CardType>(authSession, "getBeat", context.params.id);
+
+  // Проверяет выложил ли игрок карту из бито на поле после хода карты медика
+  // let medic =
+  //   (await getData<Array<any>>(authSession, "isMedic", context.params.id))
+  //     .length === 0
+  //     ? false
+  //     : true;
+
+  // logger.warn({ player: authSession.user.name, medic: medic });
+
   return {
     props: {
       authSession,
@@ -186,6 +203,8 @@ export async function getServerSideProps({ req, res, ...context }: any) {
       deck,
       availableCards,
       cardsInRows,
+      beat,
+      // medic,
     },
   };
 }

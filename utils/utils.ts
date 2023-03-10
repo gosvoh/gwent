@@ -70,6 +70,13 @@ export function useEffectOnce(effect: EffectCallback) {
 export const logger = pino({
   level: process.env.LOGGING_LEVEL,
   base: undefined,
+  // transport: {
+  //   target: "pino-pretty",
+  //   options: {
+  //     colorize: true,
+  //     singleLine: true,
+  //   },
+  // },
   timestamp: false,
   formatters: {
     level(label, number) {
