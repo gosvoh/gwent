@@ -291,7 +291,7 @@ GameFieldProps) {
           <Beat beat={beat} player={me} selectCard={selectCard} />
         ) : (
           <GameDeck
-            deck={deck}
+            deck={normalizedDeck}
             fraction={me.fraction}
             selectCard={selectCard}
           />
