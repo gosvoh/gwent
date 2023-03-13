@@ -177,12 +177,12 @@ export async function getServerSideProps({ req, res, ...context }: any) {
       context.params.id
     );
 
-    let squadCards = availableCards.filter((card) => card.type === "squad");
-    let specialCards = availableCards.filter((card) => card.type === "special");
-    specialCards = [...specialCards, ...specialCards].sort((a, b) =>
-      a.name.localeCompare(b.name)
-    );
-    availableCards = [...squadCards, ...specialCards];
+    // let squadCards = availableCards.filter((card) => card.type === "squad");
+    // let specialCards = availableCards.filter((card) => card.type === "special");
+    // specialCards = [...specialCards, ...specialCards].sort((a, b) =>
+    //   a.name.localeCompare(b.name)
+    // );
+    // availableCards = [...squadCards, ...specialCards];
   }
 
   let beat = await getData<CardType>(authSession, "getBeat", context.params.id);
