@@ -46,10 +46,10 @@ export default function Game({
 
   if (deck.length === 0 && cardsInRows.length === 0) {
     if (me.ready) return <Waiting />;
-    if (cardsInRows.length === 0)
-      return (
-        <SelectCards availableCards={availableCards} fraction={me.fraction} />
-      );
+
+    return (
+      <SelectCards availableCards={availableCards} fraction={me.fraction} />
+    );
   } else
     return (
       <GameField

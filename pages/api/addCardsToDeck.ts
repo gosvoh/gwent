@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
-import { getData } from "../../utils/utils";
+import { getData, logger } from "../../utils/utils";
 import { authOptions } from "./auth/[...nextauth]";
 
 export default async function handler(
@@ -16,7 +16,7 @@ export default async function handler(
     session,
     "addCardsToDeck",
     gameId,
-    cards.join(",")
+    "," + cards.join(",") + ","
   );
   if (!result) return;
   res.json(result);
