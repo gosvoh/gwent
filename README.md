@@ -2,7 +2,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
-First, run the development server:
+First, change field `NEXT_AUTH_URL` in the `.env` file according to your host. Then run the development server:
 
 ```bash
 npm run dev
