@@ -6,23 +6,18 @@ import InviteType from "../types/invite";
 import PlayerType from "../types/player";
 import Link from "next/link";
 import { useRouter } from "next/router";
-
-const fractions = [
-  "Монстры",
-  "Нильфгаард",
-  "Королевства Севера",
-  "Скеллиге",
-  "Скоя'таэли",
-];
+import post from "../utils/request.adapter";
 
 export default function PlayersList({
   authSession: session,
   players,
   invites,
+  fractions,
 }: {
   authSession: Session;
   players: PlayerType[];
   invites: InviteType[];
+  fractions: string[];
 }) {
   const [inviteFractions, setInviteFractions] = useMap<string, string>();
   const [errorMessages, setErrorMessages] = useMap<string, string>();
@@ -119,12 +114,15 @@ export async function getServerSideProps({ req, res }: any) {
   let authSession = await getServerSession(req, res, authOptions);
   let players = await getData<PlayerType>(authSession, "showPlayers");
   let invites = await getData<InviteType>(authSession, "showInvites");
+  let fractionsData = await post<{ name: string }>("getFractions");
+  let fractions = fractionsData.map((fraction) => fraction.name);
 
   return {
     props: {
       authSession,
       players,
       invites,
+      fractions,
     },
   };
 }

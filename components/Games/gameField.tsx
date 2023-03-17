@@ -10,6 +10,7 @@ interface GameFieldProps {
   opponent: PlayerType;
   me: PlayerType;
   deck: CardType[];
+  gameDeck: CardType[];
   cardsInRows: CardType[];
   beat: CardType[];
   // medic: boolean;
@@ -19,6 +20,7 @@ export default function GameField({
   opponent,
   me,
   deck,
+  gameDeck,
   cardsInRows,
   beat,
 }: // medic,
@@ -26,6 +28,7 @@ GameFieldProps) {
   const [normalizedDeck, setNormalizedDeck] = useState<CardType[]>([]);
   const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
   const [showBeat, setShowBeat] = useState<boolean>(false);
+  const [showDeck, setShowDeck] = useState<boolean>(false);
   const myOSRef = useRef<HTMLDivElement>(null);
   const myDBRef = useRef<HTMLDivElement>(null);
   const myRPRef = useRef<HTMLDivElement>(null);
@@ -37,16 +40,18 @@ GameFieldProps) {
   }, [router]);
 
   useEffect(() => {
-    if (deck.length === 0) return;
+    if (gameDeck.length === 0) return;
 
-    let uniqueDuplicates = findDuplicates(deck.map((card) => card.name));
-    let newDeck = [...deck];
+    let uniqueDuplicates = findDuplicates(gameDeck.map((card) => card.name));
+    let newDeck = [...gameDeck];
     if (uniqueDuplicates.length > 0) {
-      let index = deck.findIndex((card) => card.name === uniqueDuplicates[0]);
+      let index = gameDeck.findIndex(
+        (card) => card.name === uniqueDuplicates[0]
+      );
       newDeck.splice(index, 1);
     }
     setNormalizedDeck(newDeck);
-  }, [deck]);
+  }, [gameDeck]);
 
   // useEffect(() => {
   //   if (!medic) return;
@@ -70,7 +75,7 @@ GameFieldProps) {
 
   async function placeCard(card: CardType | null, row: string) {
     if (!card) return;
-    let test = deck.filter((c) => c.row === row && c.name === card.name);
+    let test = gameDeck.filter((c) => c.row === row && c.name === card.name);
     if (test.length === 0) return;
 
     let res = await fetch(`/api/addCardToRow?gameId=${router.query.id}`, {
@@ -110,7 +115,7 @@ GameFieldProps) {
 
     clearRefs();
 
-    let selectedCards = deck.filter((c) => c.name === card.name);
+    let selectedCards = gameDeck.filter((c) => c.name === card.name);
     selectedCards.forEach((c) => {
       if (c.row === "Дальнобойный")
         myDBRef.current?.classList.add(styles.canBePlaced);
@@ -183,7 +188,9 @@ GameFieldProps) {
                   ))}
             </div>
             <div className={styles.actions}>
-              <button>Show deck</button>
+              <button onClick={() => setShowDeck(!showDeck)}>
+                {showDeck ? "Close" : "Show"} deck
+              </button>
               <button onClick={() => setShowBeat(!showBeat)}>
                 {showBeat ? "Close" : "Show"} beat
               </button>
@@ -289,6 +296,8 @@ GameFieldProps) {
       <div className={styles.deckGrid}>
         {showBeat ? (
           <Beat beat={beat} player={me} selectCard={selectCard} />
+        ) : showDeck ? (
+          <Deck deck={deck} fraction={me.fraction} />
         ) : (
           <GameDeck
             deck={normalizedDeck}
@@ -312,7 +321,7 @@ function GameDeck({
 }) {
   return (
     <>
-      <p>Your deck</p>
+      <p>Your current deck</p>
       {deck.map((card) => {
         return (
           <CardComponent
@@ -348,6 +357,17 @@ function Beat({
             onClick={() => selectCard(card)}
           />
         );
+      })}
+    </>
+  );
+}
+
+function Deck({ deck, fraction }: { deck: CardType[]; fraction: string }) {
+  return (
+    <>
+      <p>Your rest deck</p>
+      {deck.map((card) => {
+        return <CardComponent card={card} key={card.id} fraction={fraction} />;
       })}
     </>
   );

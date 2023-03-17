@@ -14,20 +14,20 @@ interface GameProps {
   authSession: Session;
   playerInfo: PlayerType[];
   deck: CardType[];
+  gameDeck: CardType[];
   availableCards: CardType[];
   cardsInRows: CardType[];
   beat: CardType[];
-  medic: boolean;
 }
 
 export default function Game({
   authSession,
   playerInfo,
+  gameDeck,
   deck,
   availableCards,
   cardsInRows,
   beat,
-  medic,
 }: GameProps) {
   let check: any = playerInfo[0];
   if (check.ERROR) return <AlertContainer alertMessage={check.ERROR} />;
@@ -44,7 +44,7 @@ export default function Game({
   if (opponent.tokens === 0) return <Winner winner={me.login} />;
   if (me.tokens === 0) return <Winner winner={opponent.login} />;
 
-  if (deck.length === 0 && cardsInRows.length === 0) {
+  if (gameDeck.length === 0 && cardsInRows.length === 0) {
     if (me.ready) return <Waiting />;
 
     return (
@@ -55,9 +55,10 @@ export default function Game({
       <GameField
         me={me}
         opponent={opponent}
-        deck={deck}
+        gameDeck={gameDeck}
         cardsInRows={cardsInRows}
         beat={beat}
+        deck={deck}
         // medic={medic}
       />
     );
@@ -157,7 +158,7 @@ export async function getServerSideProps({ req, res, ...context }: any) {
     context.params.id
   );
 
-  let deck = await getData<CardType>(
+  let gameDeck = await getData<CardType>(
     authSession,
     "showGameDeck",
     context.params.id
@@ -170,7 +171,7 @@ export async function getServerSideProps({ req, res, ...context }: any) {
   );
 
   let availableCards: CardType[] = [];
-  if (deck.length == 0 && cardsInRows.length == 0) {
+  if (gameDeck.length == 0 && cardsInRows.length == 0) {
     availableCards = await getData<CardType>(
       authSession,
       "getAvailableCards",
@@ -187,6 +188,12 @@ export async function getServerSideProps({ req, res, ...context }: any) {
 
   let beat = await getData<CardType>(authSession, "getBeat", context.params.id);
 
+  let deck = await getData<CardType>(
+    authSession,
+    "showDeck",
+    context.params.id
+  );
+
   // Проверяет выложил ли игрок карту из бито на поле после хода карты медика
   // let medic =
   //   (await getData<Array<any>>(authSession, "isMedic", context.params.id))
@@ -200,6 +207,7 @@ export async function getServerSideProps({ req, res, ...context }: any) {
     props: {
       authSession,
       playerInfo,
+      gameDeck,
       deck,
       availableCards,
       cardsInRows,

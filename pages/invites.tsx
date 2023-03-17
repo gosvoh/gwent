@@ -6,21 +6,24 @@ import styles from "../styles/Invites.module.scss";
 import { authOptions } from "./api/auth/[...nextauth]";
 import InviteType from "../types/invite";
 import Link from "next/link";
+import post from "../utils/request.adapter";
 
-const fractions = [
-  "Монстры",
-  "Нильфгаард",
-  "Королевства Севера",
-  "Скеллиге",
-  "Скоя'таэли",
-];
+// const fractions = [
+//   "Монстры",
+//   "Нильфгаард",
+//   "Королевства Севера",
+//   "Скеллиге",
+//   "Скоя'таэли",
+// ];
 
 export default function Invites({
   authSession: session,
   invites,
+  fractions,
 }: {
   authSession: Session;
   invites: InviteType[];
+  fractions: string[];
 }) {
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState("");
@@ -198,11 +201,14 @@ export default function Invites({
 export async function getServerSideProps({ req, res }: any) {
   let authSession = await getServerSession(req, res, authOptions);
   let invites = await getData<InviteType>(authSession, "showInvites");
+  let fractionsData = await post<{ name: string }>("getFractions");
+  let fractions = fractionsData.map((fraction) => fraction.name);
 
   return {
     props: {
       authSession,
       invites,
+      fractions,
     },
   };
 }
